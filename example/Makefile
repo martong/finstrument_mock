@@ -7,6 +7,9 @@ main: hook.o bar.o foo.o main.cpp hook.hpp
 hook.o: hook.cpp hook.hpp
 	${mclang_o} -c hook.cpp -o hook.o ${CXX_FLAGS}
 bar.o: bar.cpp
-	${mclang} -c bar.cpp -o bar.o
+	${mclang} -fsanitize=mock -c bar.cpp -o bar.o
 foo.o: foo.cpp
 	${mclang_o} -c foo.cpp -o foo.o ${CXX_FLAGS}
+
+clean:
+	rm *.o
