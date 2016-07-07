@@ -1,5 +1,4 @@
-void foo();
-void foo2();
+#include "foo.hpp"
 
 void bar() {
   foo();
