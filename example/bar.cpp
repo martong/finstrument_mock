@@ -1,6 +1,6 @@
 #include "foo.hpp"
 
 void bar() {
-  foo();
-  foo2();
+  fooRvoidPvoid();
+  fooRvoidPvoid_2();
 }

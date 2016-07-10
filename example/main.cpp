@@ -4,23 +4,24 @@
 #include "foo.hpp"
 #include "called.hpp"
 
-void fake_foo() {
-    test::called.insert(reinterpret_cast<char *>(fake_foo));
-    printf("fake_foo called\n");
+void fake_fooRvoidPvoid() {
+    test::called.insert(reinterpret_cast<char *>(fake_fooRvoidPvoid));
 }
 
-// bar calls foo and foo2,
-// we want to fake foo, but not foo2
+/// bar calls foo and foo_2,
+/// we want to fake foo, but not foo_2
 void bar();
 
-TEST(Foo, Z3foov) {
-    ::fake::subs.insert(
-        {reinterpret_cast<char *>(foo), reinterpret_cast<char *>(fake_foo)});
+/// signature: void()
+TEST(Foo, fooRvoidPvoid) {
+    ::fake::subs.insert({reinterpret_cast<char *>(fooRvoidPvoid),
+                         reinterpret_cast<char *>(fake_fooRvoidPvoid)});
     bar();
 
-    EXPECT_EQ(test::called.count(reinterpret_cast<char *>(foo)), 0);
-    EXPECT_EQ(test::called.count(reinterpret_cast<char *>(fake_foo)), 1);
-    EXPECT_EQ(test::called.count(reinterpret_cast<char *>(foo2)), 1);
+    EXPECT_EQ(test::called.count(reinterpret_cast<char *>(fooRvoidPvoid)), 0);
+    EXPECT_EQ(test::called.count(reinterpret_cast<char *>(fake_fooRvoidPvoid)),
+              1);
+    EXPECT_EQ(test::called.count(reinterpret_cast<char *>(fooRvoidPvoid_2)), 1);
 }
 
 int main(int argc, char **argv) {

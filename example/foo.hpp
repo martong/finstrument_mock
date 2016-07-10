@@ -1,4 +1,4 @@
 #pragma once
 
-void foo();
-void foo2();
+void fooRvoidPvoid();
+void fooRvoidPvoid_2();
