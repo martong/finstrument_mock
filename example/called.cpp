@@ -1,5 +1,5 @@
 #include "called.hpp"
 
-namespace test {
+namespace ftest {
     std::unordered_set<char*> called;
 }

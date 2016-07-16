@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-namespace test {
+namespace ftest {
     extern std::unordered_set<char*> called;
 }
 
