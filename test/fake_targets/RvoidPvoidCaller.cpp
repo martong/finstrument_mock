@@ -1,7 +1,7 @@
-void fooRvoidPvoid();
-void fooRvoidPvoid_2();
+void RvoidPvoid();
+void RvoidPvoid_2();
 
 void RvoidPvoidCaller() {
-  fooRvoidPvoid();
-  fooRvoidPvoid_2();
+  RvoidPvoid();
+  RvoidPvoid_2();
 }

@@ -1,9 +1,9 @@
 #include "called.hpp"
 
-void fooRvoidPvoid() {
-    ::ftest::called.insert(reinterpret_cast<char*>(fooRvoidPvoid));
+void RvoidPvoid() {
+    ::ftest::called.insert(reinterpret_cast<char*>(RvoidPvoid));
 }
 
-void fooRvoidPvoid_2() {
-    ::ftest::called.insert(reinterpret_cast<char*>(fooRvoidPvoid_2));
+void RvoidPvoid_2() {
+    ::ftest::called.insert(reinterpret_cast<char*>(RvoidPvoid_2));
 }

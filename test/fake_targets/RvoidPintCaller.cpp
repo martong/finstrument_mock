@@ -1,10 +1,10 @@
 //int square(int a) { return a*a; }
 
-void fooRvoidPint(int);
-void fooRvoidPint_2(int);
+void RvoidPint(int);
+void RvoidPint_2(int);
 
 void RvoidPintCaller() {
-  fooRvoidPint(13);
-  fooRvoidPint_2(15);
-  //fooRvoidPint(square(3));
+  RvoidPint(13);
+  RvoidPint_2(15);
+  //RvoidPint(square(3));
 }
