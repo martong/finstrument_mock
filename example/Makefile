@@ -2,7 +2,8 @@ gtest_include_dir=/Users/mg/local/googletest/googletest/include
 gtest_lib=/Users/mg/local/googletest/build/googlemock/gtest/libgtest.a
 
 mclang=../build/bin/clang++
-mclang_o=../build.origin/bin/clang++
+#mclang_o=../build.origin/bin/clang++
+mclang_o=clang++
 CXX_FLAGS=-std=c++14 -isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/include
 
 main: hook.o bar.o foo.o called.o main.cpp hook.hpp
