@@ -7,3 +7,7 @@ void RvoidPint(int a) {
 void RvoidPint_2(int a) {
     ::ftest::called.insert(reinterpret_cast<char*>(RvoidPint_2));
 }
+
+void RvoidPint_3(int a) {
+    ::ftest::called.insert(reinterpret_cast<char*>(RvoidPint_3));
+}
