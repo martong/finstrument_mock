@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdarg>
 
 #include "hook.hpp"
 
@@ -14,13 +15,18 @@ int __fake_subject_hook(void *callee) {
     //return 1;
 }
 
-void __fake_hook(void *callee) {
+void __fake_hook(void *callee, int count, ...) {
     printf("__fake_hook; callee: %p\n", callee);
-    using sig = void();
+    using sig = void(int, ...);
     using funptr = sig*;
     char* fake_fun = ::fake::subs.at(reinterpret_cast<char*>(callee));
     funptr f = reinterpret_cast<funptr>(fake_fun);
-    f();
+
+    va_list args;
+    va_start(args, count);
+    void* rest = va_arg(args, void*);
+    f(count, rest);
+    va_end(args);
 }
 
-}
+} // extern "C"

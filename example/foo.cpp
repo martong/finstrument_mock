@@ -3,10 +3,10 @@
 
 #include "called.hpp"
 
-void fooRvoidPvoid() {
-    test::called.insert(reinterpret_cast<char*>(fooRvoidPvoid));
+void fooRvoidPint(int a) {
+    test::called.insert(reinterpret_cast<char*>(fooRvoidPint));
 }
 
-void fooRvoidPvoid_2() {
-    test::called.insert(reinterpret_cast<char*>(fooRvoidPvoid_2));
+void fooRvoidPint_2(int a) {
+    test::called.insert(reinterpret_cast<char*>(fooRvoidPint_2));
 }
