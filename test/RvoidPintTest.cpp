@@ -82,3 +82,23 @@ TEST_F(FooFixture, RvoidPint_lvalue) {
     EXPECT_EQ(::ftest::called.count(address(RvoidPint_4)), 0);
     EXPECT_EQ(::ftest::called.count(address(fake_RvoidPint_4)), 1);
 }
+
+
+void PhiProblem(int);
+void RvoidPint_5(int);
+
+FAKE_AUX_FUN(fake_RvoidPint_5)
+
+// User provides
+void fake_RvoidPint_5(int a) {
+    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPint_5));
+    EXPECT_EQ(a, 25);
+}
+
+TEST_F(FooFixture, PhiProblem) {
+    ::fake::subs.insert({address(RvoidPint_5), address(fake_RvoidPint_5_aux)});
+    PhiProblem(5);
+
+    EXPECT_EQ(::ftest::called.count(address(RvoidPint_5)), 0);
+    EXPECT_EQ(::ftest::called.count(address(fake_RvoidPint_5)), 1);
+}
