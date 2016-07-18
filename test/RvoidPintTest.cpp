@@ -6,13 +6,15 @@ void RvoidPint_2(int);
 
 #define FAKE_AUX_FUN(fake_fun)                                            \
     void fake_fun(int a);                                                 \
-    void fake_fun##_aux(int count, ...) {                                 \
+    void fake_fun##_aux(int count, void *ret_value, int ret_size, ...) {  \
         ::ftest::called.insert(reinterpret_cast<char *>(fake_fun##_aux)); \
                                                                           \
         EXPECT_EQ(count, 1);                                              \
+        EXPECT_EQ(ret_value, nullptr);                                    \
+        EXPECT_EQ(ret_size, 0);                                           \
                                                                           \
         va_list args;                                                     \
-        va_start(args, count);                                            \
+        va_start(args, ret_size);                                         \
         fake_fun(va_arg(args, int));                                      \
         va_end(args);                                                     \
     }
