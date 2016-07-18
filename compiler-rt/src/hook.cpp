@@ -15,7 +15,7 @@ int __fake_subject_hook(void *callee) {
     //return 1;
 }
 
-void __fake_hook(void *callee, int count, ...) {
+void __fake_hook(void *callee, int count, void* ret_value, int ret_size, ...) {
     printf("__fake_hook; callee: %p\n", callee);
     using sig = void(int, ...);
     using funptr = sig*;
@@ -23,9 +23,10 @@ void __fake_hook(void *callee, int count, ...) {
     funptr f = reinterpret_cast<funptr>(fake_fun);
 
     va_list args;
-    va_start(args, count);
+    va_start(args, ret_size);
     void* rest = va_arg(args, void*);
-    f(count, rest);
+    //f(count, rest);
+    f(count, ret_value, ret_size, rest);
     va_end(args);
 }
 

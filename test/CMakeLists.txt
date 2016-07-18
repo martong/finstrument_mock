@@ -2,7 +2,8 @@ project(test)
 
 include_directories(.)
 include_directories(../compiler-rt/include)
-file(GLOB SOURCES "*.cpp")
+#file(GLOB SOURCES "*.cpp")
+file(GLOB SOURCES main.cpp called.cpp RintPvoid.cpp RintPvoidTest.cpp)
 
 add_subdirectory(fake_targets)
 
