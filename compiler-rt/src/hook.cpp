@@ -15,19 +15,10 @@ int __fake_subject_hook(void *callee) {
     //return 1;
 }
 
-void __fake_hook(void *callee, int count, void* ret_value, int ret_size, ...) {
+void* __fake_hook_map(void *callee) {
     printf("__fake_hook; callee: %p\n", callee);
-    using sig = void(int, ...);
-    using funptr = sig*;
     char* fake_fun = ::fake::subs.at(reinterpret_cast<char*>(callee));
-    funptr f = reinterpret_cast<funptr>(fake_fun);
-
-    va_list args;
-    va_start(args, ret_size);
-    void* rest = va_arg(args, void*);
-    //f(count, rest);
-    f(count, ret_value, ret_size, rest);
-    va_end(args);
+    return fake_fun;
 }
 
 } // extern "C"

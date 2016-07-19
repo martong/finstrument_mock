@@ -3,6 +3,7 @@ project(test)
 include_directories(.)
 include_directories(../compiler-rt/include)
 file(GLOB SOURCES "*.cpp")
+#file(GLOB SOURCES main.cpp called.cpp RvoidPvoid.cpp RvoidPvoidTest.cpp RvoidPint.cpp RvoidPintTest.cpp)
 
 add_subdirectory(fake_targets)
 
