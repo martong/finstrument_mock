@@ -9,7 +9,7 @@ namespace fake {
 
 extern "C" {
 
-void* __fake_hook_map(void *callee) {
+void* __fake_hook(void *callee) {
     printf("__fake_hook; callee: %p\n", callee);
     auto it = ::fake::subs.find(reinterpret_cast<char*>(callee));
     if (it == ::fake::subs.end()) { return nullptr; }
