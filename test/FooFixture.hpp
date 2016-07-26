@@ -10,10 +10,23 @@
 
 #include "called.hpp"
 
+//template <typename T>
+//char *address(T t) {
+    //return reinterpret_cast<char *>(t);
+//}
+
 template <typename T>
 char *address(T t) {
-    return reinterpret_cast<char *>(t);
+    // This is the only way to get the absolute address of a member function
+    // http://stackoverflow.com/questions/8121320/get-memory-address-of-member-function
+    return (char*&)(t);
 }
+
+//template <typename T>
+//char* address_of_mem_fun(T t) {
+    //// http://stackoverflow.com/questions/8121320/get-memory-address-of-member-function
+    //return (char*&)(t);
+//}
 
 struct FooFixture : ::testing::Test {
     FooFixture() {
