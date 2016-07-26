@@ -8,7 +8,7 @@ void RvoidPvoid();
 void RvoidPvoid_2();
 
 void fake_RvoidPvoid(){
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPvoid));
+    ::ftest::called.insert(address(&fake_RvoidPvoid));
 }
 
 /// signature: void()

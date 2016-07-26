@@ -5,7 +5,7 @@ void RvoidPint(int);
 void RvoidPint_2(int);
 
 void fake_RvoidPint(int a) {
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPint));
+    ::ftest::called.insert(address(&fake_RvoidPint));
     EXPECT_EQ(a, 13);
 }
 
@@ -25,7 +25,7 @@ void RvoidPint_3(int);
 
 // User provides
 void fake_RvoidPint_3(int a) {
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPint_3));
+    ::ftest::called.insert(address(&fake_RvoidPint_3));
     static int called = 0;
     if (called == 0) {
         EXPECT_EQ(a, 13);
@@ -50,7 +50,7 @@ void RvoidPintCaller_lvalue(int);
 void RvoidPint_4(int);
 
 void fake_RvoidPint_4(int a) {
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPint_4));
+    ::ftest::called.insert(address(&fake_RvoidPint_4));
     EXPECT_EQ(a, 16);
 }
 
@@ -67,7 +67,7 @@ void PhiProblem(int);
 void RvoidPint_5(int);
 
 void fake_RvoidPint_5(int a) {
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPint_5));
+    ::ftest::called.insert(address(&fake_RvoidPint_5));
     EXPECT_EQ(a, 25);
 }
 

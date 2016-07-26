@@ -8,7 +8,7 @@ int RintPvoid();
 int RintPvoid_2();
 
 int fake_RintPvoid() {
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RintPvoid));
+    ::ftest::called.insert(address(&fake_RintPvoid));
     return 42;
 }
 

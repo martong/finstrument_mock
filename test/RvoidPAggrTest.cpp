@@ -8,7 +8,7 @@ void RvoidPAggr_2(Aggr);
 Aggr global_a{13, 26};
 
 void fake_RvoidPAggr(Aggr pa){
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_RvoidPAggr));
+    ::ftest::called.insert(address(&fake_RvoidPAggr));
     EXPECT_EQ(global_a.a, pa.a);
     EXPECT_EQ(global_a.b, pa.b);
 }

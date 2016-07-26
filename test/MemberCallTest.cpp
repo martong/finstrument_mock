@@ -5,7 +5,7 @@ void MemberCaller(X&, int);
 
 X global_x;
 void fake_foo(X* self, int p){
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_foo));
+    ::ftest::called.insert(address(&fake_foo));
     EXPECT_EQ(self, &global_x);
     EXPECT_EQ(p, 13);
 }
@@ -22,7 +22,7 @@ TEST_F(FooFixture, MemberCall) {
 
 X global_y;
 void fake_foo_2(X* self, int p){
-    ::ftest::called.insert(reinterpret_cast<char *>(fake_foo_2));
+    ::ftest::called.insert(address(&fake_foo_2));
     static int called = 0;
     if (called == 0) {
         EXPECT_EQ(self, &global_x);
