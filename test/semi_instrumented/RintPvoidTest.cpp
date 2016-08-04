@@ -13,8 +13,7 @@ int fake_RintPvoid() {
 }
 
 TEST_F(FooFixture, RintPvoidReplaced) {
-    ::fake::subs.insert(
-        {address(RintPvoid), address(fake_RintPvoid)});
+    SUBSTITUTE(&RintPvoid, &fake_RintPvoid);
     auto res = RintPvoidCaller();
 
     EXPECT_EQ(::ftest::called.count(address(RintPvoid)), 0);

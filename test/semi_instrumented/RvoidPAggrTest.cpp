@@ -14,8 +14,7 @@ void fake_RvoidPAggr(Aggr pa){
 }
 
 TEST_F(FooFixture, RvoidPAggr) {
-    ::fake::subs.insert(
-        {address(RvoidPAggr), address(fake_RvoidPAggr)});
+    SUBSTITUTE(&RvoidPAggr, &fake_RvoidPAggr);
     RvoidPAggrCaller(global_a);
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPAggr)), 0);

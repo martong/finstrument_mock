@@ -1,3 +1,5 @@
+#pragma once
+
 #include <unordered_map>
 
 namespace fake {
@@ -11,7 +13,6 @@ char *address(T t) {
     // http://stackoverflow.com/questions/8121320/get-memory-address-of-member-function
     return (char *&)(t);
 }
-
 
 }
 

@@ -1,5 +1,6 @@
 #include "X.hpp"
 #include "called.hpp"
+#include "address.hpp"
 #include "hook.hpp"
 
 void X::foo(int) {

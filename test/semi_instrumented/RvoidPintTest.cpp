@@ -11,7 +11,7 @@ void fake_RvoidPint(int a) {
 
 /// signature: void(int)
 TEST_F(FooFixture, RvoidPint) {
-    ::fake::subs.insert({address(RvoidPint), address(fake_RvoidPint)});
+    SUBSTITUTE(&RvoidPint, &fake_RvoidPint);
     RvoidPintCaller();
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPint)), 0);
@@ -38,7 +38,7 @@ void fake_RvoidPint_3(int a) {
 }
 
 TEST_F(FooFixture, RvoidPint_callsTwice) {
-    ::fake::subs.insert({address(RvoidPint_3), address(fake_RvoidPint_3)});
+    SUBSTITUTE(&RvoidPint_3, &fake_RvoidPint_3);
     RvoidPintCaller_callsTwice();
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPint_3)), 0);
@@ -55,7 +55,7 @@ void fake_RvoidPint_4(int a) {
 }
 
 TEST_F(FooFixture, RvoidPint_lvalue) {
-    ::fake::subs.insert({address(RvoidPint_4), address(fake_RvoidPint_4)});
+    SUBSTITUTE(&RvoidPint_4, &fake_RvoidPint_4);
     RvoidPintCaller_lvalue(4);
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPint_4)), 0);
@@ -72,7 +72,7 @@ void fake_RvoidPint_5(int a) {
 }
 
 TEST_F(FooFixture, PhiProblem) {
-    ::fake::subs.insert({address(RvoidPint_5), address(fake_RvoidPint_5)});
+    SUBSTITUTE(&RvoidPint_5, &fake_RvoidPint_5);
     PhiProblem(5);
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPint_5)), 0);

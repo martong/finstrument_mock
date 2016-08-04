@@ -13,8 +13,7 @@ void fake_RvoidPvoid(){
 
 /// signature: void()
 TEST_F(FooFixture, RvoidPvoid) {
-    ::fake::subs.insert(
-        {address(RvoidPvoid), address(fake_RvoidPvoid)});
+    SUBSTITUTE(&RvoidPvoid, &fake_RvoidPvoid);
     RvoidPvoidCaller();
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPvoid)), 0);

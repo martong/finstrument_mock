@@ -29,11 +29,11 @@ int fake_fclose(FILE *) { return 0; }
 } // namespace t1
 
 TEST_F(FooFixture, FreadSumIsOk) {
-    ::fake::subs.insert({address(fopen), address(t1::fake_fopen)});
-    ::fake::subs.insert({address(fread), address(t1::fake_fread)});
-    ::fake::subs.insert({address(feof), address(t1::fake_feof)});
-    ::fake::subs.insert({address(ferror), address(t1::fake_ferror)});
-    ::fake::subs.insert({address(fclose), address(t1::fake_fclose)});
+    SUBSTITUTE(&fopen, &t1::fake_fopen);
+    SUBSTITUTE(&fread, &t1::fake_fread);
+    SUBSTITUTE(&feof, &t1::fake_feof);
+    SUBSTITUTE(&ferror, &t1::fake_ferror);
+    SUBSTITUTE(&fclose, &t1::fake_fclose);
 
     auto res = Fread();
     EXPECT_EQ(res, std::accumulate(t1::a.begin(), t1::a.end(), 0.0));
@@ -57,11 +57,11 @@ int fake_fclose(FILE *) { return 0; }
 } // namespace t2
 
 TEST_F(FooFixture, FreadHandles_feof) {
-    ::fake::subs.insert({address(fopen), address(t2::fake_fopen)});
-    ::fake::subs.insert({address(fread), address(t2::fake_fread)});
-    ::fake::subs.insert({address(feof), address(t2::fake_feof)});
-    ::fake::subs.insert({address(ferror), address(t2::fake_ferror)});
-    ::fake::subs.insert({address(fclose), address(t2::fake_fclose)});
+    SUBSTITUTE(&fopen, &t2::fake_fopen);
+    SUBSTITUTE(&fread, &t2::fake_fread);
+    SUBSTITUTE(&feof, &t2::fake_feof);
+    SUBSTITUTE(&ferror, &t2::fake_ferror);
+    SUBSTITUTE(&fclose, &t2::fake_fclose);
 
     EXPECT_THROW(Fread(), FeofE);
 }

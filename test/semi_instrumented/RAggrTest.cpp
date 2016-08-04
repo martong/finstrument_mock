@@ -13,8 +13,7 @@ Aggr fake_RAggr(Aggr pa){
 }
 
 TEST_F(FooFixture, RAggrLvalue) {
-    ::fake::subs.insert(
-        {address(RAggr), address(fake_RAggr)});
+    SUBSTITUTE(&RAggr, &fake_RAggr);
     Aggr result = RAggrCaller(Aggr{13, 17});
 
     EXPECT_EQ(result.a, 26);
@@ -26,8 +25,7 @@ TEST_F(FooFixture, RAggrLvalue) {
 }
 
 TEST_F(FooFixture, RAggrRvalue) {
-    ::fake::subs.insert(
-        {address(RAggr), address(fake_RAggr)});
+    SUBSTITUTE(&RAggr, &fake_RAggr);
 
     EXPECT_EQ(RAggrCaller(Aggr{13, 17}).a, 26);
     EXPECT_EQ(RAggrCaller(Aggr{13, 17}).b, 34);
