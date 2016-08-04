@@ -1,9 +1,6 @@
 #include "FooFixture.hpp"
-#include <string>
 
 #include "Entity.hpp"
-
-std::string s;
 
 bool try_lock_result;
 bool fake_mutex_try_lock(std::mutex* self) { return try_lock_result; }
