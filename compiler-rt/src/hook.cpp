@@ -1,5 +1,5 @@
-#include <cstdio>
-#include <cstdarg>
+//#include <cstdio>
+#include <unordered_map>
 
 #include "hook.hpp"
 
@@ -24,7 +24,9 @@ Map& subs() {
 namespace fake {
 
 void clear() { subs().clear(); }
-void insert(std::pair<char*, char*> p) { subs().insert(p); }
+void insert(char* src, char* dst) {
+    subs().insert({src, dst});
+}
 
 }
 

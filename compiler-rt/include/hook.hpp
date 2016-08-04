@@ -1,11 +1,9 @@
 #pragma once
 
-#include <unordered_map>
-
 namespace fake {
 
 void clear();
-void insert(std::pair<char*, char*>);
+void insert(char* src, char* dst);
 
 template <typename T>
 char *address(T t) {
@@ -18,5 +16,5 @@ char *address(T t) {
 
 #define SUBSTITUTE(src, dst)                                              \
     do {                                                                  \
-        ::fake::insert({::fake::address((src)), ::fake::address((dst))}); \
+        ::fake::insert(::fake::address((src)), ::fake::address((dst))); \
     } while (0)
