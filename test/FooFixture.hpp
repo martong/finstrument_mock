@@ -8,6 +8,6 @@
 struct FooFixture : ::testing::Test {
     FooFixture() {
         ::ftest::called.clear();
-        ::fake::subs.clear();
+        ::fake::clear();
     }
 };

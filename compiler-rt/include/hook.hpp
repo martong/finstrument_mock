@@ -1,7 +1,10 @@
 #include <unordered_map>
 
 namespace fake {
-extern std::unordered_map<char *, char *> subs;
+
+void clear();
+void insert(std::pair<char*, char*>);
+
 }
 
 template <typename T>

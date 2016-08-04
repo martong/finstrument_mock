@@ -1,12 +1,15 @@
 #include "FooFixture.hpp"
+#include <string>
 
 #include "Entity.hpp"
+
+std::string s;
 
 bool try_lock_result;
 bool fake_mutex_try_lock(std::mutex* self) { return try_lock_result; }
 
 TEST_F(FooFixture, Mutex) {
-    ::fake::subs.insert(
+    ::fake::insert(
         {address(&std::mutex::try_lock), address(fake_mutex_try_lock)});
     Entity e;
     try_lock_result = false;
