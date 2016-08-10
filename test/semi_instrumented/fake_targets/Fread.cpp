@@ -9,6 +9,9 @@ double Fread(void) {
 
     double b[SIZE];
     FILE* fp = fopen("test.bin", "rb");
+    if (!fp) {
+        throw FerrorE{};
+    }
     size_t ret_code =
         fread(b, sizeof *b, SIZE, fp); // reads an array of doubles
     double result = 0.0;
