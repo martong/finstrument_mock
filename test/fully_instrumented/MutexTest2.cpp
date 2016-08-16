@@ -1,13 +1,13 @@
 #include "FooFixture.hpp"
 
-#include "Entity.hpp"
+#include "Entity2.hpp"
 
 namespace {
 bool try_lock_result;
 bool fake_mutex_try_lock(std::mutex* self) { return try_lock_result; }
-} // unnamed
+}
 
-TEST_F(FooFixture, Mutex) {
+TEST_F(FooFixture, Mutex2) {
     SUBSTITUTE(&std::mutex::try_lock, &fake_mutex_try_lock);
     Entity e;
     try_lock_result = false;
