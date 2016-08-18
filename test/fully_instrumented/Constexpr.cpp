@@ -20,5 +20,6 @@ TEST_F(FooFixture, Constexpr) {
     EXPECT_EQ(foo(p), 8);
 
     static_assert(bar(2) == 4, "");
+    EXPECT_EQ(bar(2), 8);
     EXPECT_EQ(bar(p), 8);
 }
