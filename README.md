@@ -360,6 +360,40 @@ cont:                                             ; preds = %else, %then
 Actually the IR is much more verbose if optimization is not enabled, therefore
 it is a good idea to use `-O2`.
 
+### Constexpr functions
+A constexpr function cannot be replaced when it is used in a compile-time expression.
+However, it can be replaced whenever it is used within a runtime context:
+```
+#include "FooFixture.hpp"
+
+namespace {
+
+constexpr int foo(int p) { return p*p; }
+int fake_foo(int p) { return p*p*p; }
+
+constexpr int bar(int p) {
+    return foo(p);
+}
+
+} // unnamed
+
+TEST_F(FooFixture, Constexpr) {
+    SUBSTITUTE(&foo, &fake_foo);
+
+    static_assert(foo(2) == 4, "");
+    EXPECT_EQ(foo(2), 8);
+    int p = 2;
+    EXPECT_EQ(foo(p), 8);
+
+    static_assert(bar(2) == 4, "");
+    EXPECT_EQ(bar(2), 8);
+    EXPECT_EQ(bar(p), 8);
+}
+```
+
+## Limitations
+Replacing virtual functions is not possible currently.
+
 ## Alternatives
 One could use `LD_PRELOAD` to substitute one function with a test double.
 For reference see
@@ -418,7 +452,6 @@ But the already existing libcxx has an implicit template instantiation with `bas
 So to make the instrumentation work either you recompile libcxx with `-fsanitize=mock` and you link against the instrumented libcxx, or you eliminate somehow the extern template declaration.
 The latter is possible in the finstrument_mock branch of the libcxx repo if you define `_LIBCPP_MOCK_SAN`.
 For more details please check the CMakeLists.txt in `instrument_always_inline`.
-
 
 ### How to access privates?
 In some white box testing cases it might be a must to access privates.
