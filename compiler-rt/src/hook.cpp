@@ -37,7 +37,7 @@ extern "C" {
 
 void* __fake_hook(void* callee) {
     // Debug
-    // printf("__fake_hook; callee: %p\n", callee);
+    //printf("__fake_hook; callee: %p\n", callee);
     auto it = subs().find(reinterpret_cast<char*>(callee));
     if (it == subs().end()) {
         return nullptr;
