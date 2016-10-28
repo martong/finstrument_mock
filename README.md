@@ -475,7 +475,7 @@ This can result a test suite which is really hard to maintain and extend.
 Works on windows only, but seems a pretty promising project:
 https://www.typemock.com/isolatorpp-product-page
 However, the project is closed source. 
-The technology they use is most probably not involving compiler generated instrumentatino hooks, but I am just guessing.
+The technology they use is most probably not involving compiler generated instrumentation hooks, but I am just guessing.
 
 ## How to build
 
