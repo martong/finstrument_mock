@@ -11,7 +11,7 @@ The below examples are actually working code extracts of the tests from this rep
 
 #### Replace functions in STL
 Consider the following concurrent `Entity`:
-```
+```c++
 // Entity.hpp
 
 #include <mutex>
@@ -41,7 +41,7 @@ private:
 };
 ```
 We can test the behaviour when the `mutex` is not locked:
-```
+```c++
 // test.cpp
 
 #include "FooFixture.hpp"
@@ -67,7 +67,7 @@ TEST_F(FooFixture, Mutex2) {
 ```
 
 #### Replace template functions
-```
+```c++
 template <typename T>
 struct TemplateS {
     int foo(int p) { return bar(p); }
@@ -98,7 +98,7 @@ TEST_F(FooFixture, FunT) {
 ```
 
 #### Replace system calls
-```
+```c++
 // Fread.hpp
 #pragma once
 
@@ -109,7 +109,7 @@ enum { SIZE = 5 };
 double Fread(void);
 ```
 
-```
+```c++
 // Fread.cpp
 
 double Fread(void) {
@@ -143,7 +143,7 @@ double Fread(void) {
 }
 ```
 
-```
+```c++
 // Test.cpp
 
 #include <stdio.h>
@@ -216,7 +216,7 @@ TEST_F(FooFixture, FreadHandles_feof) {
 ```
 #### Replace virtual functions
 
-```
+```c++
 namespace {
 struct B {
     virtual int foo2(int p) { return p; }
@@ -259,7 +259,7 @@ TEST_F(FooFixture, DynamicType2) {
 
 #### Eliminate death tests, replace `[[noreturn]]` functions
 Imagine the following little command line parser function:
-```
+```c++
 void parseCommandLineArgs(int argc, char** argv) {
     if (argc != 3) {
         std::exit(1);
@@ -274,7 +274,7 @@ void parseCommandLineArgs(int argc, char** argv) {
 ```
 
 Instead of death tests we might test like this:
-```
+```c++
 int exit_code = -1;
 struct Exc {};
 void fake_exit(int ec) {
@@ -340,7 +340,7 @@ TEST_F(NoReturn, parseCommandLineArgs) {
 
 ## How does it work?
 Each and every function call expression is replaced with the following pseudo code (let's suppose, the callee is `foo`):
-```
+```c++
 char* funptr = __fake_hook(&foo);
 if (funptr) {
     funptr(args...);
@@ -350,7 +350,7 @@ if (funptr) {
 ```
 The call to `__fake_hook` resolves in runtime if we should replace the callee to a test double or not.
 If the function does return anything other than `void`:
-```
+```c++
 char* funptr = __fake_hook(&foo);
 auto ret = result_of(&foo);
 if (funptr) {
@@ -361,7 +361,7 @@ if (funptr) {
 return ret;
 ```
 Consider the following definition of `bar`:
-```
+```c++
 int foo(int);
 
 int bar(int p) {
@@ -405,7 +405,7 @@ it is a good idea to use `-O2`.
 ### Constexpr functions
 A constexpr function cannot be replaced when it is used in a compile-time expression.
 However, it can be replaced whenever it is used within a runtime context:
-```
+```c++
 #include "FooFixture.hpp"
 
 namespace {
@@ -549,7 +549,7 @@ Currently the `-fsanitize=mock_always_inline` is tested only with the tests of t
 With this instrumentation it is not possible to replace a whole type with a test double type.
 We can replace only one function. This can be cumbersome, if we want to replace types.
 Hopefully, in the future we might be able to write such test code:
-```
+```c++
 // Don't change Entity just because of testing purposes
 class Entity {
 public:
