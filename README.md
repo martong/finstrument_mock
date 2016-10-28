@@ -214,6 +214,48 @@ TEST_F(FooFixture, FreadHandles_feof) {
     EXPECT_THROW(Fread(), FeofE);
 }
 ```
+#### Replace virtual functions
+
+```
+namespace {
+struct B {
+    virtual int foo2(int p) { return p; }
+    virtual int foo(int p) { return p; }
+};
+struct D : B {
+    virtual int foo2(int p) override { return p + p; }
+    virtual int foo(int p) override { return p + p; }
+};
+int B_fake_foo(B*, int p) { return p + p + p; }
+int D_fake_foo(D*, int p) { return p + p + p + p; }
+} // unnamed
+
+TEST_F(FooFixture, DynamicType) {
+    B* dummy = new D;
+    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
+    {
+        B* b0 = new B;
+        EXPECT_EQ(b0->foo(1), 1); // As without mock san
+    }
+    {
+        B* b1 = new D;
+        EXPECT_EQ(b1->foo(1), 4);
+    }
+}
+
+TEST_F(FooFixture, DynamicType2) {
+    B* dummy = new B;
+    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
+    {
+        B* b0 = new B;
+        EXPECT_EQ(b0->foo(1), 3);
+    }
+    {
+        B* b1 = new D;
+        EXPECT_EQ(b1->foo(1), 2); // As w/o mock san
+    }
+}
+```
 
 #### Eliminate death tests, replace `[[noreturn]]` functions
 Imagine the following little command line parser function:
@@ -391,9 +433,6 @@ TEST_F(FooFixture, Constexpr) {
 }
 ```
 
-## Limitations
-Replacing virtual functions is not possible currently.
-
 ## Alternatives
 One could use `LD_PRELOAD` to substitute one function with a test double.
 For reference see
@@ -440,6 +479,28 @@ Unfortunately we don't assert on this currently (see future work).
 
 In case of member functions the test double's signature must have the same signature, except the first argument.
 The first argument must be a pointer to the type whose member we are replacing.
+
+### Virtual functions
+Virtual functions are problematic, because a pointer-to-member function
+has a different layout in case of virtual functions than in case of regular
+member functions. We have to get the address by getting the vtable from an
+object and then getting the proper element of the vtable.
+
+GCC has a construct with which we could get the address without knowing the
+actually used ABI, but clang does not:
+https://llvm.org/bugs/show_bug.cgi?id=22121
+https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Bound-member-functions.html
+
+Note, it would be
+better to have a compiler intrinsic which would simply return the adress of
+the function, which is known statically during compile time.
+Theoritically there is no need to provide an object.
+
+We get the address now according to the Itanium C++ ABI.
+https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
+https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
+
+To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` macro, which requires a pointer to a (dummy) instance of the class which has the virtual function.
 
 ### Difficulties with libcxx and `always_inline` attribute
 If you want to instrument those calls where the callee has the `always_inline` attribute then you have to specify `-fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline`.
