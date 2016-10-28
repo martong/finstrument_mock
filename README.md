@@ -581,3 +581,6 @@ Though, this kind of compile time reflection would be a nice complement of the i
 
 ## Outlook
 You can hear more about non-intrusive testing [here](https://www.youtube.com/watch?v=U9Up_OfiW24).
+
+## Acknowledgement
+Thanks to Imre Szekeres, Gábor Horváth, Péter Bolla, Máté Csákvári, Zoltán Porkoláb, Zsolt Parragi for all the discussions we had.
