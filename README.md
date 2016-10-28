@@ -433,6 +433,26 @@ TEST_F(FooFixture, Constexpr) {
 }
 ```
 
+### Virtual functions
+Virtual functions are problematic, because a pointer-to-member function
+has a different layout in case of virtual functions than in case of regular
+member functions. We have to get the address by getting the vtable from an
+object and then getting the proper element of the vtable.
+
+GCC has a construct with which we could get the address without knowing the
+actually used ABI, but clang does not:
+https://llvm.org/bugs/show_bug.cgi?id=22121
+https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Bound-member-functions.html
+
+Note, it would be
+better to have a compiler intrinsic which would simply return the adress of
+the function, which is known statically during compile time.
+Theoritically there is no need to provide an object.
+
+We get the address now according to the Itanium C++ ABI.
+https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
+https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
+
 ## Alternatives
 One could use `LD_PRELOAD` to substitute one function with a test double.
 For reference see
@@ -481,26 +501,10 @@ In case of member functions the test double's signature must have the same signa
 The first argument must be a pointer to the type whose member we are replacing.
 
 ### Virtual functions
-Virtual functions are problematic, because a pointer-to-member function
-has a different layout in case of virtual functions than in case of regular
-member functions. We have to get the address by getting the vtable from an
-object and then getting the proper element of the vtable.
-
-GCC has a construct with which we could get the address without knowing the
-actually used ABI, but clang does not:
-https://llvm.org/bugs/show_bug.cgi?id=22121
-https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Bound-member-functions.html
-
-Note, it would be
-better to have a compiler intrinsic which would simply return the adress of
-the function, which is known statically during compile time.
-Theoritically there is no need to provide an object.
-
-We get the address now according to the Itanium C++ ABI.
-https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
-https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
-
 To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` macro, which requires a pointer to a (dummy) instance of the class which has the virtual function.
+
+### [[noreturn]] functions
+Use the SUBSTITUTE_NORETURN macro.
 
 ### Difficulties with libcxx and `always_inline` attribute
 If you want to instrument those calls where the callee has the `always_inline` attribute then you have to specify `-fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline`.
