@@ -471,6 +471,12 @@ Also the test setup is cumbersome and might be necessary to build a different sh
 for different test cases.
 This can result a test suite which is really hard to maintain and extend.
 
+### Isolator++
+Works on windows only, but seems a pretty promising project:
+https://www.typemock.com/isolatorpp-product-page
+However, the project is closed source. 
+The technology they use is most probably not involving compiler generated instrumentatino hooks, but I am just guessing.
+
 ## How to build
 
 Do a regular [clang build](http://clang.llvm.org/get_started.html), but instead of the original repos clone llvm, clang, libcxx from https://github.com/martong?tab=repositories .
@@ -504,7 +510,7 @@ The first argument must be a pointer to the type whose member we are replacing.
 To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` macro, which requires a pointer to a (dummy) instance of the class which has the virtual function.
 
 ### [[noreturn]] functions
-Use the SUBSTITUTE_NORETURN macro.
+Use the `SUBSTITUTE_NORETURN` macro.
 
 ### Difficulties with libcxx and `always_inline` attribute
 If you want to instrument those calls where the callee has the `always_inline` attribute then you have to specify `-fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline`.
