@@ -36,6 +36,11 @@ void bar() { foo(); ... }
 ```
 In one hand, when we would test the `bar()` function then we would link the test executable with the `MockA.o` object file.
 On the other hand, we would link the production code with `A.o`.
+More information on how to use link seams in practice:
+* http://jayconrod.com/posts/23/tutorial-function-interposition-in-linux
+* http://samanbarghi.com/blog/2014/09/05/how-to-wrap-a-system-call-libc-function-in-linux/
+* http://stackoverflow.com/questions/31131163/how-to-hook-all-linux-system-calls-during-a-binary-execution
+
 Link-time dependency replacement is not possible if the dependency is defined in a static library or in the same translation unit where the SUT is defined.
 It is also not feasible to use link seams if the dependency is implemented as an inline function.
 This makes the use of this seam cumbersome or impossible when the dependant unit is a template or when the dependency is a template.
@@ -44,6 +49,12 @@ This makes the use of link seams somewhat hard to notice.
 On top of all, link-time substitution requires strong support from the build system we are using.
 Thus, we might have to specialize the building of the tests for each and every unit.
 This does not scale well and can be really demanding regarding to maintenance.
+
+As a summary, the major limitations of link seams are that we cannot use them with:
+* static libraries
+* header only libraries
+* inline functions
+* templates
 
 #### Preprocessor Seams
 Preprocessor seams can be applied to replace the invocation of a global function to an invocation of a test double.
@@ -84,8 +95,47 @@ However, in legacy code it is quite often that the dependency is hardwired to a 
 In these cases, using an object or compile seam would require instrusive changes in the original source code (e.g. adding a new interface and a setter/constructor).
 Consequently, there are numerous situations when we cannot use object and compile seams.
 
+#### Isolator++
+With Isolator++ one can create non-intrusive tests on Windows, but Windows only.
+https://www.typemock.com/isolatorpp-product-page
+The project is closed source and commercial, therefore we cannot know what technology (or seam) they use.
+Perhaps they use runtime instrumentation to alter the behaviour of the unit.
+
 ## Motivating Examples
 The below examples are actually working code extracts of the tests from this repository.
+
+#### Replace template functions
+```c++
+template <typename T>
+T FunTemp(T t) {
+    return t;
+}
+
+int fake_FunTemp(int p) { return p * 3; }
+TEST_F(FooFixture, FunT) {
+    SUBSTITUTE(&FunTemp<int>, &fake_FunTemp);
+    int p = 13;
+    auto res = FunTemp(p);
+    EXPECT_EQ(res, 39);
+}
+```
+
+#### Replace functions in class templates
+```c++
+template <typename T>
+struct TemplateS {
+    int foo(int p) { return bar(p); }
+    int bar(int p) { return p; }
+};
+
+int fake_bar_mem_fun(TemplateS<int>* self, int p) { return p * 3; }
+TEST_F(FooFixture, ClassT) {
+    SUBSTITUTE(&TemplateS<int>::bar, &fake_bar_mem_fun);
+    TemplateS<int> t;
+    auto res = t.foo(13);
+    EXPECT_EQ(res, 39);
+}
+```
 
 #### Replace functions in STL
 Consider the following concurrent `Entity`:
@@ -141,39 +191,6 @@ TEST_F(FooFixture, Mutex2) {
     EXPECT_EQ(e.process(1), -1);
     owns_lock_result = true;
     EXPECT_EQ(e.process(1), 1);
-}
-```
-
-#### Replace functions in class templates
-```c++
-template <typename T>
-struct TemplateS {
-    int foo(int p) { return bar(p); }
-    int bar(int p) { return p; }
-};
-
-int fake_bar_mem_fun(TemplateS<int>* self, int p) { return p * 3; }
-TEST_F(FooFixture, ClassT) {
-    SUBSTITUTE(&TemplateS<int>::bar, &fake_bar_mem_fun);
-    TemplateS<int> t;
-    auto res = t.foo(13);
-    EXPECT_EQ(res, 39);
-}
-```
-
-#### Replace template functions
-```c++
-template <typename T>
-T FunTemp(T t) {
-    return t;
-}
-
-int fake_FunTemp(int p) { return p * 3; }
-TEST_F(FooFixture, FunT) {
-    SUBSTITUTE(&FunTemp<int>, &fake_FunTemp);
-    int p = 13;
-    auto res = FunTemp(p);
-    EXPECT_EQ(res, 39);
 }
 ```
 
@@ -532,30 +549,6 @@ Theoritically there is no need to provide an object.
 We get the address now according to the Itanium C++ ABI.
 https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
 https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
-
-## Alternatives
-One could use `LD_PRELOAD` to substitute one function with a test double.
-For reference see
-* http://jayconrod.com/posts/23/tutorial-function-interposition-in-linux
-* http://samanbarghi.com/blog/2014/09/05/how-to-wrap-a-system-call-libc-function-in-linux/
-* http://stackoverflow.com/questions/31131163/how-to-hook-all-linux-system-calls-during-a-binary-execution
-
-However, there are limitations of this method.
-We cannot use it with:
-* static libraries
-* header only libraries
-* inline functions
-* templates
-
-Also the test setup is cumbersome and might be necessary to build a different shared library
-for different test cases.
-This can result a test suite which is really hard to maintain and extend.
-
-### Isolator++
-Works on windows only, but seems a pretty promising project:
-https://www.typemock.com/isolatorpp-product-page
-However, the project is closed source. 
-The technology they use is most probably not involving compiler generated instrumentation hooks, but I am just guessing.
 
 ## How to build
 
