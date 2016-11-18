@@ -144,7 +144,7 @@ TEST_F(FooFixture, Mutex2) {
 }
 ```
 
-#### Replace template functions
+#### Replace functions in class templates
 ```c++
 template <typename T>
 struct TemplateS {
@@ -159,8 +159,10 @@ TEST_F(FooFixture, ClassT) {
     auto res = t.foo(13);
     EXPECT_EQ(res, 39);
 }
+```
 
-
+#### Replace template functions
+```c++
 template <typename T>
 T FunTemp(T t) {
     return t;
