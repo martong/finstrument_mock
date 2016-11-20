@@ -151,7 +151,6 @@ Values C_fake_foo(C*, int p) { return Values::FC; }
 Values D_fake_foo(D*, int p) { return Values::FD; }
 }
 
-
 TEST_F(DynamicType, MultipleInheritance_D) {
     using MultipleInheritance::Values;
     using MultipleInheritance::B;
@@ -221,4 +220,49 @@ TEST_F(DynamicType, MultipleInheritance_B) {
     }
 }
 
-// TODO virtual inheritance
+namespace Dreaded {
+
+enum class Values : int { B, C1, C2, D, FB, FC1, FC2, FD, Bbar };
+class B {
+public:
+    virtual Values foo() { return Values::B; }
+    virtual Values bar() { return Values::Bbar; }
+};
+class C1 : public virtual B {
+public:
+    virtual Values foo() { return bar(); }
+};
+
+class C2 : public virtual B {
+public:
+    virtual Values bar() { return Values::C2; }
+};
+
+class D : public C1, public C2 {};
+Values C2_fake_foo(C2*) { return Values::FC2; }
+}
+
+// Inspired from isocpp cpp FAQ:
+// https://isocpp.org/wiki/faq/multiple-inheritance#mi-delegate-to-sister
+TEST_F(DynamicType, Dreaded) {
+    using Dreaded::B;
+    using Dreaded::C1;
+    using Dreaded::C2;
+    using Dreaded::D;
+    using Dreaded::Values;
+    using Dreaded::C2_fake_foo;
+
+    // normally would call C2::bar()
+    {
+        D* p1 = new D();
+        EXPECT_EQ(p1->foo(), Values::C2);
+    }
+
+    {
+        C2* dummy = new C2();
+        SUBSTITUTE_VIRTUAL(&C2::bar, dummy, C2_fake_foo);
+
+        D* p1 = new D();
+        EXPECT_EQ(p1->foo(), Values::FC2);
+    }
+}
