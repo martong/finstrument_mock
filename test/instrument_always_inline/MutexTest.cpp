@@ -1,6 +1,8 @@
 #include "FooFixture.hpp"
 
-#include "Entity2.hpp"
+#include "Entity.hpp"
+
+struct AlwaysInline : FooFixture {};
 
 namespace {
 
@@ -10,7 +12,7 @@ bool fake_owns_lock(Lock*) { return owns_lock_result; }
 
 } // unnamed
 
-TEST_F(FooFixture, Mutex3) {
+TEST_F(AlwaysInline, MutexTest) {
     SUBSTITUTE(&Lock::owns_lock, &fake_owns_lock);
     Entity e;
     owns_lock_result = false;

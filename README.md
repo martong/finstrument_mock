@@ -176,48 +176,41 @@ TEST_F(FooFixture, ClassT) {
 Consider the following concurrent `Entity`:
 ```c++
 // Entity.hpp
-
-#include <mutex>
-#include <numeric>
-#include <vector>
-
 class Entity {
 public:
-    int process(int i) const {
-        std::unique_lock<std::mutex> lock{m, std::try_to_lock};
-        if (lock.owns_lock()) {
-            auto result = std::accumulate(v.begin(), v.end(), i);
-            return result;
-        } else {
-            return -1;
-        }
-        return 0;
-    }
-    void add(int i) {
-        std::lock_guard<std::mutex> lock{m};
-        v.push_back(i);
-    }
+    int process(int i) const;
+    void add(int i);
 
 private:
     std::vector<int> v;
     mutable std::mutex m;
 };
+
+// Entity.cpp
+int Entity::process(int i) const {
+    std::unique_lock<std::mutex> lock{m, std::try_to_lock};
+    if (lock.owns_lock()) {
+        auto result = std::accumulate(v.begin(), v.end(), i);
+        return result;
+    } else {
+        return -1;
+    }
+    return 0;
+}
+
+void Entity::add(int i) {
+    std::lock_guard<std::mutex> lock{m};
+    v.push_back(i);
+}
 ```
-We can test the behaviour when the `mutex` is not locked:
+We can test the behaviour based on whether the lock is already owned by another thread or not:
 ```c++
 // test.cpp
-
-#include "FooFixture.hpp"
-
 #include "Entity.hpp"
-
-namespace {
 
 bool owns_lock_result;
 using Lock = std::unique_lock<std::mutex>;
 bool fake_owns_lock(Lock*) { return owns_lock_result; }
-
-} // unnamed
 
 TEST_F(FooFixture, Mutex2) {
     SUBSTITUTE(&Lock::owns_lock, &fake_owns_lock);
