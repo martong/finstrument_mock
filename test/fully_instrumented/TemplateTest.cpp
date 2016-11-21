@@ -25,6 +25,18 @@ TEST_F(FooFixture, FunT) {
     EXPECT_EQ(res, 39);
 }
 
+namespace {
+inline int foo(int p) {
+    return FunTemp(p);
+}
+}
+TEST_F(FooFixture, CallFunT) {
+    SUBSTITUTE(&FunTemp<int>, &fake_FunTemp);
+    int p = 13;
+    auto res = foo(p);
+    EXPECT_EQ(res, 39);
+}
+
 struct Class {
     template <typename T>
     T FunTemp(T t) {

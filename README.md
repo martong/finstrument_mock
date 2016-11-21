@@ -1,5 +1,34 @@
 # Instrumentation for testing
 
+* [Introduction](#introduction)
+   * [Alternatives](#alternatives)
+      * [Link Seams](#link-seams)
+      * [Preprocessor Seams](#preprocessor-seams)
+      * [Object and Compile Seams](#object-and-compile-seams)
+      * [Isolator  ](#isolator)
+* [Motivating Examples](#motivating-examples)
+   * [Replace template functions](#replace-template-functions)
+   * [Replace functions in class templates](#replace-functions-in-class-templates)
+   * [Replace (always inline) functions in STL](#replace-always-inline-functions-in-stl)
+   * [Replace calls in libc - fopen(), fread()](#replace-calls-in-libc---fopen-fread)
+   * [Replace system calls - time()](#replace-system-calls---time)
+   * [Eliminate death tests, replace [[noreturn]] functions](#eliminate-death-tests-replace-noreturn-functions)
+* [How does it work?](#how-does-it-work)
+   * [Constexpr functions](#constexpr-functions)
+   * [Virtual functions](#virtual-functions)
+* [How to build](#how-to-build)
+* [Usage](#usage)
+   * [Virtual functions](#virtual-functions-1)
+      * [Replace virtual functions](#replace-virtual-functions)
+   * [[[noreturn]] functions](#noreturn-functions)
+   * [Difficulties with libcxx and always_inline attribute](#difficulties-with-libcxx-and-always_inline-attribute)
+   * [How to access privates?](#how-to-access-privates)
+* [Performance](#performance)
+* [Future work](#future-work)
+   * [Compile time reflection](#compile-time-reflection)
+* [Outlook](#outlook)
+* [Acknowledgement](#acknowledgement)
+
 ## Introduction
 There are many legacy enterprise applications that were written without automated unit tests. It is often very difficult to maintain and modify such code, since we cannot verify the changes. A frequently used approach in this situation is to write additional tests without modifying the original source code. There are several techniques to do this ([Alternatives](#alternatives)). However, these techniques have their own limitations and disadvantages.
 
@@ -104,30 +133,36 @@ Perhaps they use runtime instrumentation to alter the behaviour of the unit.
 ## Motivating Examples
 The below examples are actually working code extracts of the tests from this repository.
 
-#### Replace template functions
+### Replace template functions
 ```c++
+// unit_under_test.hpp
 template <typename T>
 T FunTemp(T t) {
     return t;
 }
+inline int foo(int p) {
+    return FunTemp(p);
+}
 
-int fake_FunTemp(int p) { return p * 3; }
-TEST_F(FooFixture, FunT) {
+// test.cpp
+TEST_F(FooFixture, CallFunT) {
     SUBSTITUTE(&FunTemp<int>, &fake_FunTemp);
     int p = 13;
-    auto res = FunTemp(p);
+    auto res = foo(p);
     EXPECT_EQ(res, 39);
 }
 ```
 
-#### Replace functions in class templates
+### Replace functions in class templates
 ```c++
+// unit_under_test.hpp
 template <typename T>
 struct TemplateS {
     int foo(int p) { return bar(p); }
     int bar(int p) { return p; }
 };
 
+// test.cpp
 int fake_bar_mem_fun(TemplateS<int>* self, int p) { return p * 3; }
 TEST_F(FooFixture, ClassT) {
     SUBSTITUTE(&TemplateS<int>::bar, &fake_bar_mem_fun);
@@ -137,7 +172,7 @@ TEST_F(FooFixture, ClassT) {
 }
 ```
 
-#### Replace functions in STL
+### Replace (always inline) functions in STL
 Consider the following concurrent `Entity`:
 ```c++
 // Entity.hpp
@@ -194,7 +229,7 @@ TEST_F(FooFixture, Mutex2) {
 }
 ```
 
-#### Replace system calls
+### Replace calls in libc - fopen(), fread()
 ```c++
 // Fread.hpp
 #pragma once
@@ -311,50 +346,62 @@ TEST_F(FooFixture, FreadHandles_feof) {
     EXPECT_THROW(Fread(), FeofE);
 }
 ```
-#### Replace virtual functions
 
+### Replace system calls - time()
 ```c++
-namespace {
-struct B {
-    virtual int foo2(int p) { return p; }
-    virtual int foo(int p) { return p; }
+struct Message {
+    int type;
+    std::vector<int> events;
 };
-struct D : B {
-    virtual int foo2(int p) override { return p + p; }
-    virtual int foo(int p) override { return p + p; }
-};
-int B_fake_foo(B*, int p) { return p + p + p; }
-int D_fake_foo(D*, int p) { return p + p + p + p; }
-} // unnamed
 
-TEST_F(FooFixture, DynamicType) {
-    B* dummy = new D;
-    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
-    {
-        B* b0 = new B;
-        EXPECT_EQ(b0->foo(1), 1); // As without mock san
+void reloadConfig() { /*...*/ }
+void processMessage(int msgType) { /*...*/ }
+void processEvent(int event) { /*...*/ }
+
+#define REALOAD_TIMEOUT 60
+
+void handleMessage(const Message& msg) {
+    time_t start = time(NULL);
+    processMessage(msg.type);
+    for (int i = 0; i < msg.events.size(); ++i) {
+        processEvent(msg.events[i]);
     }
-    {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), 4);
+    time_t duration = (time(NULL) - start);
+    if (duration > REALOAD_TIMEOUT) {
+        reloadConfig();
     }
 }
 
-TEST_F(FooFixture, DynamicType2) {
-    B* dummy = new B;
-    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
-    {
-        B* b0 = new B;
-        EXPECT_EQ(b0->foo(1), 3);
-    }
-    {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), 2); // As w/o mock san
+
+// TEST.cpp
+#include <gtest/gtest.h>
+#include "hook.hpp"
+
+time_t fake_time(time_t *) {
+    static int called = 0;
+    if (called == 0) {
+        ++called;
+        return 0;
+    } else { // When called the 2. time, fake the timeout
+        return REALOAD_TIMEOUT + 1;
     }
 }
+
+bool reloadConfigCalled = false;
+void mock_reloadConfig() { reloadConfigCalled = true; }
+
+TEST(handleMessage, reloadConfig_shall_be_called_on_timeout) {
+    SUBSTITUTE(&time, &fake_time);
+    SUBSTITUTE(&reloadConfig, &mock_reloadConfig);
+    handleMessage(Message());
+    EXPECT_EQ(reloadConfigCalled, true);
+}
+
 ```
+Note, actually syscalls are wrapped in libc and the compiler will generate a call to the specific wrapper function.
+If the compiler would emit inline assembly with the number of the syscall, then we would not be able ro replace the system calls.
 
-#### Eliminate death tests, replace `[[noreturn]]` functions
+### Eliminate death tests, replace `[[noreturn]]` functions
 Imagine the following little command line parser function:
 ```c++
 void parseCommandLineArgs(int argc, char** argv) {
@@ -581,6 +628,49 @@ The first argument must be a pointer to the type whose member we are replacing.
 
 ### Virtual functions
 To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` macro, which requires a pointer to a (dummy) instance of the class which has the virtual function.
+
+#### Replace virtual functions
+
+```c++
+namespace {
+struct B {
+    virtual int foo2(int p) { return p; }
+    virtual int foo(int p) { return p; }
+};
+struct D : B {
+    virtual int foo2(int p) override { return p + p; }
+    virtual int foo(int p) override { return p + p; }
+};
+int B_fake_foo(B*, int p) { return p + p + p; }
+int D_fake_foo(D*, int p) { return p + p + p + p; }
+} // unnamed
+
+TEST_F(FooFixture, DynamicType) {
+    B* dummy = new D;
+    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
+    {
+        B* b0 = new B;
+        EXPECT_EQ(b0->foo(1), 1); // As without mock san
+    }
+    {
+        B* b1 = new D;
+        EXPECT_EQ(b1->foo(1), 4);
+    }
+}
+
+TEST_F(FooFixture, DynamicType2) {
+    B* dummy = new B;
+    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
+    {
+        B* b0 = new B;
+        EXPECT_EQ(b0->foo(1), 3);
+    }
+    {
+        B* b1 = new D;
+        EXPECT_EQ(b1->foo(1), 2); // As w/o mock san
+    }
+}
+```
 
 ### [[noreturn]] functions
 Use the `SUBSTITUTE_NORETURN` macro.
