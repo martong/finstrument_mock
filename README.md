@@ -1,7 +1,7 @@
 # Instrumentation for testing
 
 ## Introduction
-There are many legacy enterprise applications that were written without automated unit tests. It is often very difficult to maintain and modify such code, since we cannot verify the changes. A frequently used approach in this situation is to write additional tests without modifying the original source code. There are several techniques to do this ([Alternatives](#Alternatives)). However, these techniques have their own limitations and disadvantages.
+There are many legacy enterprise applications that were written without automated unit tests. It is often very difficult to maintain and modify such code, since we cannot verify the changes. A frequently used approach in this situation is to write additional tests without modifying the original source code. There are several techniques to do this ([Alternatives](#alternatives)). However, these techniques have their own limitations and disadvantages.
 
 My aim is to provide an alternative technique without those limitations. I used the Clang compiler sanitizer infrastructure to implement testing specific instrumentation (prototype). The instrumentation makes it possible to replace any C/C++ function with a corresponding test double function.
 
