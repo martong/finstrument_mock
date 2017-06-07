@@ -595,11 +595,10 @@ https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-function
 Do a regular [clang build](http://clang.llvm.org/get_started.html), but instead of the original repos clone llvm, clang, libcxx from https://github.com/martong?tab=repositories .
 Checkout the branch `finstrument_mock` on all repos you just have cloned.
 Build the compiler.
-Then, you have to obtain a googletest library (or you might use the one shipped with clang).
 Once you have built the compiler then you need to build the runtime library, which is in this repository.
 For exmple:
 ```
-cmake .. -G Ninja -Dgtest_include_dir=/Users/mg/local/googletest/googletest/include -Dgtest_static_lib=/Users/mg/local/googletest/build/googlemock/gtest/libgtest.a -DCMAKE_CXX_COMPILER=/Users/mg/Work/finstrument_mock/compiler/build.debug/bin/clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+cmake .. -G Ninja -DCMAKE_CXX_COMPILER=/Users/mg/Work/finstrument_mock/compiler/build.debug/bin/clang++
 ```
 Once you have the compiler runtime and all the tests are passing then you might put the built library into one of the system library paths, so you could easily link other projects against it.
 For instance, on OSX I put it under `/usr/local/lib`.
