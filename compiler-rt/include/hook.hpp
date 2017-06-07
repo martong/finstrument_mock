@@ -36,6 +36,7 @@ char* address_of_virtual_fun(Class* aClass, MemPtr memptr) {
 
 } // namespace fake
 
+// TODO use functions (?)
 #define SUBSTITUTE(src, dst)                                            \
     do {                                                                \
         ::fake::insert(::fake::address((src)), ::fake::address((dst))); \
