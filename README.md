@@ -212,7 +212,7 @@ bool owns_lock_result;
 using Lock = std::unique_lock<std::mutex>;
 bool fake_owns_lock(Lock*) { return owns_lock_result; }
 
-TEST_F(FooFixture, Mutex2) {
+TEST_F(FooFixture, MutexTest) {
     SUBSTITUTE(&Lock::owns_lock, &fake_owns_lock);
     Entity e;
     owns_lock_result = false;
