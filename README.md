@@ -593,12 +593,67 @@ https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-function
 ## How to build
 
 Do a regular [clang build](http://clang.llvm.org/get_started.html), but instead of the original repos clone llvm, clang, libcxx from https://github.com/martong?tab=repositories .
-Checkout the branch `finstrument_mock` on all repos you just have cloned.
+Checkout the branch `finstrument_mock` on all repos that just have been cloned.
 Build the compiler.
-Once you have built the compiler then you need to build the runtime library, which is in this repository.
-For exmple:
 ```
-cmake .. -G Ninja -DCMAKE_CXX_COMPILER=/Users/mg/Work/finstrument_mock/compiler/build.debug/bin/clang++
+# choose a directory where we want to place the source and build
+export PROJ=~/finstrument_mock
+export COMPILER_DIR=$PROJ/compiler/
+export COMPILER_SRC=$COMPILER_DIR/git
+export COMPILER_BUILD=$COMPILER_DIR/build
+
+mkdir -p $COMPILER_SRC
+cd $COMPILER_SRC
+
+git clone https://github.com/martong/llvm.git
+cd llvm
+git checkout finstrument_mock
+
+cd projects
+git clone https://github.com/martong/libcxx.git
+cd libcxx
+git checkout finstrument_mock
+
+# Only needed on Linux
+# cd -
+# git clone https://github.com/llvm-mirror/libcxxabi.git
+# cd libcxxabi
+# git checkout release_39
+
+cd $COMPILER_SRC/llvm/tools
+git clone https://github.com/martong/clang.git
+cd clang
+git checkout finstrument_mock
+
+# create a directory where we want to place the build
+mkdir -p $COMPILER_BUILD
+cd $COMPILER_BUILD
+cmake $COMPILER_SRC/llvm -G Ninja -DCMAKE_BUILD_TYPE=Release
+ninja
+
+# execute tests with lit.py
+# tests for this instrumentation
+python $COMPILER_SRC/llvm/utils/lit/lit.py -sv --param clang_site_config=$COMPILER_BUILD/tools/clang/test/lit.site.cfg $COMPILER_SRC/llvm/tools/clang/test/CodeGenCXX/InstrumentMock/
+# regression tests for code generation for C++
+python $COMPILER_SRC/llvm/utils/lit/lit.py -sv --param clang_site_config=$COMPILER_BUILD/tools/clang/test/lit.site.cfg $COMPILER_SRC/llvm/tools/clang/test/CodeGenCXX/
+# regression tests for code generation in general
+python $COMPILER_SRC/llvm/utils/lit/lit.py -sv --param clang_site_config=$COMPILER_BUILD/tools/clang/test/lit.site.cfg $COMPILER_SRC/llvm/tools/clang/test/CodeGen/
+```
+Once the compiler is built then we need to build the runtime library, which is in this repository.
+In order to build the tests we have to use the use the modified compiler.
+```
+mkdir -p $PROJ/rt
+cd $PROJ/rt
+
+git clone https://github.com/martong/finstrument_mock.git
+cd finstrument_mock
+mkdir build
+cd build
+cmake .. -G Ninja -DCMAKE_CXX_COMPILER=$COMPILER_BUILD/bin/clang++
+# build
+ninja
+# execute tests
+ctest
 ```
 Once you have the compiler runtime and all the tests are passing then you might put the built library into one of the system library paths, so you could easily link other projects against it.
 For instance, on OSX I put it under `/usr/local/lib`.
@@ -735,7 +790,7 @@ Of course this method has it's own disadvantages as well:
 Though, this kind of compile time reflection would be a nice complement of the instrumentation presented in this repository.
 
 ## Outlook
-You can hear more about non-intrusive testing [here](https://www.youtube.com/watch?v=U9Up_OfiW24).
+More about non-intrusive testing [here](https://www.youtube.com/watch?v=U9Up_OfiW24).
 
 ## Acknowledgement
 Thanks to Imre Szekeres, Gábor Horváth, Péter Bolla, Máté Csákvári, Zoltán Porkoláb, Zsolt Parragi for all the discussions we had.
