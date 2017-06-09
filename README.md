@@ -609,16 +609,11 @@ git clone https://github.com/martong/llvm.git
 cd llvm
 git checkout finstrument_mock
 
+# Only needed on OSX
 cd projects
 git clone https://github.com/martong/libcxx.git
 cd libcxx
 git checkout finstrument_mock
-
-# Only needed on Linux
-# cd -
-# git clone https://github.com/llvm-mirror/libcxxabi.git
-# cd libcxxabi
-# git checkout release_39
 
 cd $COMPILER_SRC/llvm/tools
 git clone https://github.com/martong/clang.git
@@ -733,6 +728,7 @@ But the already existing libcxx has an implicit template instantiation with `bas
 So to make the instrumentation work either you recompile libcxx with `-fsanitize=mock` and you link against the instrumented libcxx, or you eliminate somehow the extern template declaration.
 The latter is possible in the finstrument_mock branch of the libcxx repo if you define `_LIBCPP_MOCK_SAN`.
 For more details please check the CMakeLists.txt in `instrument_always_inline`.
+Note that this problem does not arise on Linux/GCC/6.2/libstdc++.
 
 ### How to access privates?
 In some white box testing cases it might be a must to access privates.
