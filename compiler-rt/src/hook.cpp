@@ -3,21 +3,56 @@
 
 #include "hook.hpp"
 
-// We need to make sure that the template instantiation of the underlying map
-// is happening with a unique type.
-// This is must because if we'd use a static in the global namespace then
-// the linker might choose an instantiation from an other TU which might had
-// been compiled with -fsanitize=mock.
-// That instantiation would call into __fake_hook, which in turn would call into
-// the instantiation, a vicious infinite circle.
-// Unnamed namespace will handle this.
-//
-// We also must build a shared library, so the linker must emit all template
-// instantiations and will not chose from an other TU an other instantiation
-// which might be built with -fsanitize=mock. That would again result in an
-// infinite loop.
-// E.g. libcpp murmur2_or_cityhash<> instantiations caused this kind of bug.
 namespace {
+
+using u64 = unsigned long long;
+static const u64 kLinuxLowMemEnd = 0x00007fff7fff;
+static const u64 kLinuxHighMemBeg = 0x7f0000000000;
+static const u64 kLinuxHighMemEnd = 0x7fffffffffff;
+static const u64 N = 16;
+static const u64 kLinuxLowShadowOffset = 0x00007fff80000;
+//static const u64 kLinuxHighShadowOffset = LinuxLowShadowOffset * (N) + 1;
+
+#define kLowMemBeg      0
+#ifdef __linux__
+  #define kLowMemEnd kLinuxLowMemEnd
+  #define kHighMemBeg kLinuxHighMemBeg
+  #define kHighMemEnd kLinuxHighMemEnd
+
+  #define LOW_SHADOW_OFFSET kLinuxLowShadowOffset
+#elif __APPLE__
+#endif
+
+// mem & 0xffff00000000 == 0
+#define LOW_ADDR(mem) ((mem) <= kLowMemEnd)
+
+#define LOW_MEM_TO_SHADOW(mem) ((mem) * N + LOW_SHADOW_OFFSET)
+#define HIGH_SHADOW_OFFSET LOW_MEM_TO_SHADOW(kLowMemEnd) + 1
+#define HIGH_MEM_TO_SHADOW(mem) (((mem) - kHighMemBeg) * N + HIGH_SHADOW_OFFSET)
+#define MEM_TO_SHADOW(mem) (LOW_ADDR((mem)) ? LOW_MEM_TO_SHADOW((mem)) : HIGH_MEM_TO_SHADOW((mem)))
+
+#define kLowShadowBeg   MEM_TO_SHADOW(kLowMemBeg)
+#define kLowShadowEnd   MEM_TO_SHADOW(kLowMemEnd)
+#define kHighShadowBeg  MEM_TO_SHADOW(kHighMemBeg)
+#define kHighShadowEnd  MEM_TO_SHADOW(kHighMemEnd)
+
+void PrintAddressSpaceLayout() {
+  printf("|| `[%p, %p]` || HighMem    ||\n",
+         (void*)kHighMemBeg, (void*)kHighMemEnd);
+  printf("|| `[%p, %p]` || HighShadow ||\n",
+         (void*)kHighShadowBeg, (void*)kHighShadowEnd);
+  printf("|| `[%p, %p]` || LowShadow  ||\n",
+         (void*)kLowShadowBeg, (void*)kLowShadowEnd);
+  printf("|| `[%p, %p]` || LowMem     ||\n",
+         (void*)kLowMemBeg, (void*)kLowMemEnd);
+}
+
+__attribute__((constructor))
+void mocksan_init() {
+    printf("mocksan_init\n");
+    PrintAddressSpaceLayout();
+}
+
 
 using Map = std::unordered_map<char*, char*>;
 Map& subs() {
@@ -37,7 +72,7 @@ extern "C" {
 
 void* __fake_hook(void* callee) {
     // Debug
-    //printf("__fake_hook; callee: %p\n", callee);
+    printf("__fake_hook; callee: %p\n", callee);
     auto it = subs().find(reinterpret_cast<char*>(callee));
     if (it == subs().end()) {
         return nullptr;
