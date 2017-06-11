@@ -174,6 +174,14 @@ inline bool AddrIsInMem(uptr a) {
 
 } // unnamed
 
+#ifdef DEBUG
+#define DEBUG_TEST 1
+#else
+#define DEBUG_TEST 0
+#endif
+#define debug_printf(fmt, ...) \
+            do { if (DEBUG_TEST) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+
 namespace fake {
 
 void clear() {
@@ -198,15 +206,14 @@ void insert(char *src, char *dst) {
 extern "C" {
 
 void *__fake_hook(void *callee) {
-  // Debug
-  printf("__fake_hook; callee: %p\n", callee);
+  debug_printf("__fake_hook; callee: %p\n", callee);
   assert(AddrIsInMem((uptr)callee));
 
   uptr shadow = MemToShadow((uptr)callee);
   char **shadowPtr = reinterpret_cast<char **>(shadow);
-  printf("__fake_hook; shadow: %p\n", shadowPtr);
+  debug_printf("__fake_hook; shadow: %p\n", shadowPtr);
   char *shadowValue = *shadowPtr;
-  printf("__fake_hook; shadowValue: %p\n", shadowValue);
+  debug_printf("__fake_hook; shadowValue: %p\n", shadowValue);
   // assert(shadowValue == nullptr);
 
   return shadowValue;
