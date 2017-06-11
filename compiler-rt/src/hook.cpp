@@ -68,6 +68,10 @@ uptr internal_mmap(void *addr, size_t length, int prot, int flags,
   return (uptr)mmap(addr, length, prot, flags, fd, offset);
 }
 
+int internal_munmap(void *addr, size_t length) {
+  return munmap(addr, length);
+}
+
 bool internal_iserror(uptr retval, int *rverrno) {
   if (retval == (uptr)-1) {
     if (rverrno)
@@ -76,6 +80,17 @@ bool internal_iserror(uptr retval, int *rverrno) {
   } else {
     return false;
   }
+}
+
+int Munmap(uptr fixed_addr, uptr size) {
+  uptr PageSize = GetPageSize();
+  int res = internal_munmap((void *)(fixed_addr & ~(PageSize - 1)),
+                         RoundUpTo(size, PageSize));
+  if (res != 0)
+    printf("ERROR: %s failed to "
+           "deallocate 0x%zx (%zd) bytes at address %zx (errno: %d)\n",
+           "MockSanitizer", size, size, fixed_addr, res);
+  return res;
 }
 
 void *MmapFixedNoReserve(uptr fixed_addr, uptr size, const char *name) {
@@ -126,6 +141,11 @@ void ReserveShadowMemoryRange(uptr beg, uptr end, const char *name) {
   }
 }
 
+void ReleaseShadowMemoryRange(uptr beg, uptr end) {
+  uptr size = end - beg + 1;
+  Munmap(beg, size);
+}
+
 __attribute__((constructor))
 void mocksan_init() {
     printf("mocksan_init\n");
@@ -151,9 +171,25 @@ Map& subs() {
 
 namespace fake {
 
-void clear() { subs().clear(); }
-void insert(char* src, char* dst) { subs().insert({src, dst}); }
+//void clear() { subs().clear(); }
+void clear() {
+    printf("mocksan clear()\n");
+    ReleaseShadowMemoryRange(kLowShadowBeg, kLowShadowEnd);
+    ReleaseShadowMemoryRange(kHighShadowBeg, kHighShadowEnd);
+    ReserveShadowMemoryRange(kLowShadowBeg, kLowShadowEnd, "low shadow");
+    ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
 }
+
+//void insert(char* src, char* dst) { subs().insert({src, dst}); }
+void insert(char* src, char* dst) { 
+    printf("insert; src, dst: %p, %p\n", src, dst);
+    uptr shadow = MemToShadow((uptr)src);
+    char** shadowPtr = reinterpret_cast<char**>(shadow);
+    printf("insert; shadowPtr: %p\n", shadowPtr);
+    *shadowPtr = dst; 
+}
+
+} // fake
 
 extern "C" {
 
@@ -162,18 +198,20 @@ void* __fake_hook(void* callee) {
     printf("__fake_hook; callee: %p\n", callee);
 
     uptr shadow = MemToShadow((uptr)callee);
-    char* shadowPtr = reinterpret_cast<char*>(shadow);
+    char** shadowPtr = reinterpret_cast<char**>(shadow);
     printf("__fake_hook; shadow: %p\n", shadowPtr);
-    char* shadowValue = reinterpret_cast<char*>(*shadowPtr);
+    char* shadowValue = *shadowPtr;
     printf("__fake_hook; shadowValue: %p\n", shadowValue);
-    assert(shadowValue == nullptr);
+    //assert(shadowValue == nullptr);
 
-    auto it = subs().find(reinterpret_cast<char*>(callee));
-    if (it == subs().end()) {
-        return nullptr;
-    } else {
-        return it->second;
-    }
+    return shadowValue;
+
+    //auto it = subs().find(reinterpret_cast<char*>(callee));
+    //if (it == subs().end()) {
+    //    return nullptr;
+    //} else {
+    //    return it->second;
+    //}
 }
 
 } // extern "C"
