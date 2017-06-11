@@ -1,8 +1,9 @@
-#include <errno.h>
-#include <unistd.h> // _SC_PAGESIZE
 #include <cassert>
 #include <cstdarg>
+#include <cstdlib>
 #include <sys/mman.h> // mmap
+#include <errno.h>
+#include <unistd.h> // _SC_PAGESIZE
 
 #include "hook.hpp"
 
