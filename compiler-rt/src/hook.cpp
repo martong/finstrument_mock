@@ -6,6 +6,7 @@
 
 #include "hook.hpp"
 
+namespace {
 
 using u64 = unsigned long long;
 using uptr = unsigned long;
@@ -158,7 +159,17 @@ inline uptr MemToShadow(uptr p) {
   return MEM_TO_SHADOW(p);
 }
 
-namespace {
+inline bool AddrIsInLowMem(uptr a) {
+  return a < kLowMemEnd;
+}
+
+inline bool AddrIsInHighMem(uptr a) {
+  return a >= kHighMemBeg && a <= kHighMemEnd;
+}
+
+inline bool AddrIsInMem(uptr a) {
+  return AddrIsInLowMem(a) || AddrIsInHighMem(a);
+}
 
 using Map = std::unordered_map<char*, char*>;
 Map& subs() {
@@ -196,6 +207,7 @@ extern "C" {
 void* __fake_hook(void* callee) {
     // Debug
     printf("__fake_hook; callee: %p\n", callee);
+    assert(AddrIsInMem((uptr)callee));
 
     uptr shadow = MemToShadow((uptr)callee);
     char** shadowPtr = reinterpret_cast<char**>(shadow);
