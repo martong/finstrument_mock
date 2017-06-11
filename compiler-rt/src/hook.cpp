@@ -1,4 +1,5 @@
 //#include <cstdio>
+#include <errno.h>
 #include <unistd.h> // _SC_PAGESIZE
 #include <cassert>
 #include <sys/mman.h> // mmap
@@ -9,22 +10,34 @@
 namespace {
 
 using u64 = unsigned long long;
-using uptr = unsigned long;
+using uptr = unsigned long long;
+static_assert(sizeof(u64) == 8, "");
+static_assert(sizeof(uptr) == 8, "");
+
+static const u64 N = 16;
+
 static const u64 kLinuxLowMemEnd = 0x00007fff7fff;
 static const u64 kLinuxHighMemBeg = 0x7f0000000000;
 static const u64 kLinuxHighMemEnd = 0x7fffffffffff;
-static const u64 N = 16;
 static const u64 kLinuxLowShadowOffset = 0x00007fff80000;
-//static const u64 kLinuxHighShadowOffset = LinuxLowShadowOffset * (N) + 1;
+
+static const u64 kOSXLowMemEnd = (1ull << 44) / N - 1;
+static const u64 kOSXHighMemBeg = 0x7f0000000000;
+static const u64 kOSXHighMemEnd = 0x7fffffffffff;
+static const u64 kOSXLowShadowOffset = kOSXLowMemEnd + 1;
 
 #define kLowMemBeg      0
+
 #ifdef __linux__
   #define kLowMemEnd kLinuxLowMemEnd
   #define kHighMemBeg kLinuxHighMemBeg
   #define kHighMemEnd kLinuxHighMemEnd
-
   #define LOW_SHADOW_OFFSET kLinuxLowShadowOffset
 #elif __APPLE__
+  #define kLowMemEnd kOSXLowMemEnd
+  #define kHighMemBeg kOSXHighMemBeg
+  #define kHighMemEnd kOSXHighMemEnd
+  #define LOW_SHADOW_OFFSET kOSXLowShadowOffset
 #endif
 
 // mem & 0xffff00000000 == 0
@@ -89,7 +102,7 @@ int Munmap(uptr fixed_addr, uptr size) {
                          RoundUpTo(size, PageSize));
   if (res != 0)
     printf("ERROR: %s failed to "
-           "deallocate 0x%zx (%zd) bytes at address %zx (errno: %d)\n",
+           "deallocate 0x%llx (%zd) bytes at address %llx (errno: %d)\n",
            "MockSanitizer", size, size, fixed_addr, res);
   return res;
 }
@@ -106,7 +119,7 @@ void *MmapFixedNoReserve(uptr fixed_addr, uptr size, const char *name) {
   int reserrno;
   if (internal_iserror(p, &reserrno))
     printf("ERROR: %s failed to "
-           "allocate 0x%zx (%zd) bytes at address %zx (errno: %d)\n",
+           "allocate 0x%llx (%zd) bytes at address %llx (errno: %d)\n",
            "MockSanitizer", size, size, fixed_addr, reserrno);
   return (void *)p;
 }
@@ -136,7 +149,7 @@ void ReserveShadowMemoryRange(uptr beg, uptr end, const char *name) {
   uptr size = end - beg + 1;
   void *res = MmapFixedNoReserve(beg, size, name);
   if (res != (void*)beg) {
-    printf("ReserveShadowMemoryRange failed while trying to map 0x%zx bytes. "
+    printf("ReserveShadowMemoryRange failed while trying to map 0x%llx bytes. "
            "Perhaps you're using ulimit -v\n", size);
     abort();
   }
@@ -194,6 +207,7 @@ void clear() {
 //void insert(char* src, char* dst) { subs().insert({src, dst}); }
 void insert(char* src, char* dst) { 
     printf("insert; src, dst: %p, %p\n", src, dst);
+    assert(AddrIsInMem((uptr)src));
     uptr shadow = MemToShadow((uptr)src);
     char** shadowPtr = reinterpret_cast<char**>(shadow);
     printf("insert; shadowPtr: %p\n", shadowPtr);
