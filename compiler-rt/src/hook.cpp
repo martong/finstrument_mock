@@ -1,9 +1,7 @@
-//#include <cstdio>
 #include <errno.h>
 #include <unistd.h> // _SC_PAGESIZE
 #include <cassert>
 #include <sys/mman.h> // mmap
-#include <unordered_map>
 
 #include "hook.hpp"
 
@@ -40,14 +38,14 @@ static const u64 kOSXLowShadowOffset = kOSXLowMemEnd + 1;
 #define LOW_SHADOW_OFFSET kOSXLowShadowOffset
 #endif
 
-// mem & 0xffff00000000 == 0
-#define LOW_ADDR(mem) ((mem) <= kLowMemEnd)
+#define ADDR_IS_IN_LOW_MEM(mem) ((mem) <= kLowMemEnd)
 
 #define LOW_MEM_TO_SHADOW(mem) ((mem)*N + LOW_SHADOW_OFFSET)
 #define HIGH_SHADOW_OFFSET LOW_MEM_TO_SHADOW(kLowMemEnd + 1)
 #define HIGH_MEM_TO_SHADOW(mem) (((mem)-kHighMemBeg) * N + HIGH_SHADOW_OFFSET)
 #define MEM_TO_SHADOW(mem)                                                     \
-  (LOW_ADDR((mem)) ? LOW_MEM_TO_SHADOW((mem)) : HIGH_MEM_TO_SHADOW((mem)))
+  (ADDR_IS_IN_LOW_MEM((mem)) ? LOW_MEM_TO_SHADOW((mem))                        \
+                             : HIGH_MEM_TO_SHADOW((mem)))
 
 #define kLowShadowBeg MEM_TO_SHADOW(kLowMemBeg)
 #define kLowShadowEnd (LOW_MEM_TO_SHADOW(kLowMemEnd + 1) - 1)
@@ -174,17 +172,10 @@ inline bool AddrIsInMem(uptr a) {
   return AddrIsInLowMem(a) || AddrIsInHighMem(a);
 }
 
-using Map = std::unordered_map<char *, char *>;
-Map &subs() {
-  static Map s;
-  return s;
-}
-
 } // unnamed
 
 namespace fake {
 
-// void clear() { subs().clear(); }
 void clear() {
   printf("mocksan clear()\n");
   ReleaseShadowMemoryRange(kLowShadowBeg, kLowShadowEnd);
@@ -193,7 +184,6 @@ void clear() {
   ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
 }
 
-// void insert(char* src, char* dst) { subs().insert({src, dst}); }
 void insert(char *src, char *dst) {
   printf("insert; src, dst: %p, %p\n", src, dst);
   assert(AddrIsInMem((uptr)src));
@@ -220,13 +210,6 @@ void *__fake_hook(void *callee) {
   // assert(shadowValue == nullptr);
 
   return shadowValue;
-
-  // auto it = subs().find(reinterpret_cast<char*>(callee));
-  // if (it == subs().end()) {
-  //    return nullptr;
-  //} else {
-  //    return it->second;
-  //}
 }
 
 } // extern "C"
