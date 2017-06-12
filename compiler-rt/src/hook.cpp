@@ -164,8 +164,10 @@ void ReleaseShadowMemoryRange(uptr beg, uptr end) {
 
 // If there are several dynamic libs with [[constructor]] init function, then
 // the order during the linkage matters.  Unfortunately this order on OSX (lld)
-// is the reverse of the order in Linux (gnu ld).
-// Note about .ctor section:
+// is the reverse of the order in Linux (gnu ld).  Also, the parameter to the
+// attribute (priority) did not have any effect on the order of execution of
+// the init functions of the shared libs neither on Linux nor on OSX.  Note
+// about .ctor section:
 // https://stackoverflow.com/questions/420350/c-ctor-question-linux
 __attribute__((constructor)) void mocksan_init() {
   Printf("mocksan_init\n");
