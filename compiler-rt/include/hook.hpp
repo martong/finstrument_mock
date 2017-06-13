@@ -48,8 +48,8 @@ char* address_of_virtual_fun(Class* aClass, MemPtr memptr) {
 /// The standard states: The behavior is undefined if the function with this
 /// attribute actually returns.
 ///
-/// Note2, for some reason
-/// SUBSTITUTE(&std::exit, &fake_exit) fails because of a strange linker error.
+/// We can't use the normal SUBSTITUTE macro bacuse of a strange clang error:
+/// SUBSTITUTE(&std::exit, &fake_exit) fails.
 ///   ../compiler-rt/include/hook.hpp:9:7: error: definition with same mangled
 ///   name as another definition
 ///   char *address(T t) {
