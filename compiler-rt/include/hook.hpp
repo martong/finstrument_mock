@@ -6,19 +6,19 @@
 namespace fake {
 
 void clear();
-void insert(char* src, char* dst);
+void insert(const char* src, const char* dst);
 
 template <typename T>
-char* address(T t) {
+const char* address(T t) {
     /// This is the only way to get the absolute address of a non-virtual
     /// member-function
     /// http://stackoverflow.com/questions/8121320/get-memory-address-of-member-function
-    return (char*&)(t);
+    return (const char*&)(t);
 }
 
 template <typename Class, typename MemPtr>
-char* address_of_virtual_fun(Class* aClass, MemPtr memptr) {
-    char** vtable = *(char***)aClass;
+const char* address_of_virtual_fun(const Class* aClass, MemPtr memptr) {
+    const char** vtable = *(const char***)aClass;
 
     struct pointerToMember {
         size_t pointerOrOffset;
@@ -60,7 +60,7 @@ void SUBSTITUTE(T src, U dst) {
 /// https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
 /// https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
 template <typename T, typename U, typename V>
-void SUBSTITUTE_VIRTUAL(T src, U &ptr_to_dummy_obj, V dst) {
+void SUBSTITUTE_VIRTUAL(T src, const U& ptr_to_dummy_obj, V dst) {
   ::fake::insert(::fake::address_of_virtual_fun((ptr_to_dummy_obj), (src)),
                  ::fake::address((dst)));
 }

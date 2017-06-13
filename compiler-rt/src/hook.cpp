@@ -208,11 +208,11 @@ void clear() {
   ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
 }
 
-void insert(char *src, char *dst) {
+void insert(const char* src, const char* dst) {
   Printf("insert; src, dst: %p, %p\n", src, dst);
   assert(AddrIsInMem((uptr)src));
   uptr shadow = MemToShadow((uptr)src);
-  char **shadowPtr = reinterpret_cast<char **>(shadow);
+  const char **shadowPtr = reinterpret_cast<const char **>(shadow);
   Printf("insert; shadowPtr: %p\n", shadowPtr);
   *shadowPtr = dst;
 }

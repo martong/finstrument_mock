@@ -3,6 +3,6 @@
 #include <unordered_set>
 
 namespace ftest {
-    extern std::unordered_set<char*> called;
+    extern std::unordered_set<const char*> called;
 }
 
