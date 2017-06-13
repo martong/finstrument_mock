@@ -39,7 +39,7 @@ void fake_exit(int ec) {
 }
 
 TEST_F(NoReturn, parseCommandLineArgs) {
-    SUBSTITUTE_NORETURN(&std::exit, &fake_exit);
+    SUBSTITUTE(&std::exit, &fake_exit);
 
     /// argc mismatch
     exit_code = -1;

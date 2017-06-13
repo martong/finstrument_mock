@@ -420,7 +420,7 @@ void fake_exit(int ec) {
 }
 
 TEST_F(NoReturn, parseCommandLineArgs) {
-    SUBSTITUTE_NORETURN(&std::exit, &fake_exit);
+    SUBSTITUTE(&std::exit, &fake_exit);
 
     /// argc mismatch
     exit_code = -1;
@@ -713,9 +713,6 @@ TEST_F(FooFixture, DynamicType2) {
     }
 }
 ```
-
-### [[noreturn]] functions
-Use the `SUBSTITUTE_NORETURN` macro.
 
 ### Difficulties with libcxx and `always_inline` attribute
 If you want to instrument those calls where the callee has the `always_inline` attribute then you have to specify `-fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline`.

@@ -41,11 +41,6 @@ void SUBSTITUTE(T src, U dst) {
     ::fake::insert(::fake::address(src), ::fake::address(dst));
 }
 
-template <typename T, typename U>
-void SUBSTITUTE_NORETURN(T src, U dst) {
-    ::fake::insert(::fake::address(src), ::fake::address(dst));
-}
-
 /// Virtual functions are problematic, because a pointer-to-member function
 /// has a different layout in case of virtual functions than in case of regular
 /// member functions. We have to get the address by getting the vtable from an
