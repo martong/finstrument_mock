@@ -36,35 +36,15 @@ char* address_of_virtual_fun(Class* aClass, MemPtr memptr) {
 
 } // namespace fake
 
-// TODO use functions (?)
-#define SUBSTITUTE(src, dst)                                            \
-    do {                                                                \
-        ::fake::insert(::fake::address((src)), ::fake::address((dst))); \
-    } while (0)
+template <typename T, typename U>
+void SUBSTITUTE(T src, U dst) {
+    ::fake::insert(::fake::address(src), ::fake::address(dst));
+}
 
-/// Use this macro for substituting noreturn functions.
-///
-/// Note, be warned, you are going to have UB:
-/// The standard states: The behavior is undefined if the function with this
-/// attribute actually returns.
-///
-/// We can't use the normal SUBSTITUTE macro bacuse of a strange clang error:
-/// SUBSTITUTE(&std::exit, &fake_exit) fails.
-///   ../compiler-rt/include/hook.hpp:9:7: error: definition with same mangled
-///   name as another definition
-///   char *address(T t) {
-///         ^
-///   ../compiler-rt/include/hook.hpp:9:7: note: previous definition is here
-///   1 error generated.
-///
-///   This is happening always with __dead2 (noreturn) functions in stdlib.h
-///
-///   Bug:
-///   https://llvm.org/bugs/show_bug.cgi?id=28909
-#define SUBSTITUTE_NORETURN(src, dst)                   \
-    do {                                                \
-        ::fake::insert((char*)((src)), (char*)((dst))); \
-    } while (0)
+template <typename T, typename U>
+void SUBSTITUTE_NORETURN(T src, U dst) {
+    ::fake::insert(::fake::address(src), ::fake::address(dst));
+}
 
 /// Virtual functions are problematic, because a pointer-to-member function
 /// has a different layout in case of virtual functions than in case of regular
@@ -84,9 +64,8 @@ char* address_of_virtual_fun(Class* aClass, MemPtr memptr) {
 /// We get the address now according to the Itanium C++ ABI.
 /// https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
 /// https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
-#define SUBSTITUTE_VIRTUAL(src, ptr_to_dummy_obj, dst)                 \
-    do {                                                               \
-        ::fake::insert(                                                \
-            ::fake::address_of_virtual_fun((ptr_to_dummy_obj), (src)), \
-            ::fake::address((dst)));                                   \
-    } while (0)
+template <typename T, typename U, typename V>
+void SUBSTITUTE_VIRTUAL(T src, U &ptr_to_dummy_obj, V dst) {
+  ::fake::insert(::fake::address_of_virtual_fun((ptr_to_dummy_obj), (src)),
+                 ::fake::address((dst)));
+}
