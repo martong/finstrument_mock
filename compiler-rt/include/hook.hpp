@@ -1,44 +1,40 @@
 #pragma once
 
+#include "hook.h"
 #include <cstdio>
 #include <cstddef>
 
 namespace fake {
 
-void clear();
-void insert(const char* src, const char* dst);
-
-template <typename T>
-const char* address(T t) {
-    /// This is the only way to get the absolute address of a non-virtual
-    /// member-function
-    /// http://stackoverflow.com/questions/8121320/get-memory-address-of-member-function
-    return (const char*&)(t);
+template <typename T> const char *address(T t) {
+  /// This is the only way to get the absolute address of a non-virtual
+  /// member-function
+  /// http://stackoverflow.com/questions/8121320/get-memory-address-of-member-function
+  return (const char *&)(t);
 }
 
 template <typename Class, typename MemPtr>
-const char* address_of_virtual_fun(const Class* aClass, MemPtr memptr) {
-    const char** vtable = *(const char***)aClass;
+const char *address_of_virtual_fun(const Class *aClass, MemPtr memptr) {
+  const char **vtable = *(const char ***)aClass;
 
-    struct pointerToMember {
-        size_t pointerOrOffset;
-        ptrdiff_t thisAdjustment;
-    };
+  struct pointerToMember {
+    size_t pointerOrOffset;
+    ptrdiff_t thisAdjustment;
+  };
 
-    pointerToMember p;
-    memcpy(&p, &memptr, sizeof(p));
+  pointerToMember p;
+  memcpy(&p, &memptr, sizeof(p));
 
-    static const size_t pfnAdjustment = 1;
-    size_t offset = (p.pointerOrOffset - pfnAdjustment) / sizeof(char*);
+  static const size_t pfnAdjustment = 1;
+  size_t offset = (p.pointerOrOffset - pfnAdjustment) / sizeof(char *);
 
-    return vtable[offset];
+  return vtable[offset];
 }
 
 } // namespace fake
 
-template <typename T, typename U>
-void SUBSTITUTE(T src, U dst) {
-    ::fake::insert(::fake::address(src), ::fake::address(dst));
+template <typename T, typename U> void SUBSTITUTE(T src, U dst) {
+  _substitute_function(::fake::address(src), ::fake::address(dst));
 }
 
 /// Virtual functions are problematic, because a pointer-to-member function
@@ -60,7 +56,8 @@ void SUBSTITUTE(T src, U dst) {
 /// https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
 /// https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
 template <typename T, typename U, typename V>
-void SUBSTITUTE_VIRTUAL(T src, const U& ptr_to_dummy_obj, V dst) {
-  ::fake::insert(::fake::address_of_virtual_fun((ptr_to_dummy_obj), (src)),
-                 ::fake::address((dst)));
+void SUBSTITUTE_VIRTUAL(T src, const U &ptr_to_dummy_obj, V dst) {
+  _substitute_function(
+      ::fake::address_of_virtual_fun((ptr_to_dummy_obj), (src)),
+      ::fake::address((dst)));
 }

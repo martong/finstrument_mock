@@ -9,6 +9,6 @@
 struct FooFixture : ::testing::Test {
     FooFixture() {
         ::ftest::called.clear();
-        ::fake::clear();
+        _clear_function_substitutions();
     }
 };

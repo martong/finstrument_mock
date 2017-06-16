@@ -198,28 +198,24 @@ inline bool AddrIsInMem(uptr a) {
 #define debug_printf(fmt, ...) \
             do { if (DEBUG_TEST) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
-namespace fake {
+extern "C" {
 
-void clear() {
-  Printf("mocksan clear()\n");
+void _clear_function_substitutions() {
+  Printf("_clear_function_substitutions\n");
   ReleaseShadowMemoryRange(kLowShadowBeg, kLowShadowEnd);
   ReleaseShadowMemoryRange(kHighShadowBeg, kHighShadowEnd);
   ReserveShadowMemoryRange(kLowShadowBeg, kLowShadowEnd, "low shadow");
   ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
 }
 
-void insert(const char* src, const char* dst) {
-  Printf("insert; src, dst: %p, %p\n", src, dst);
+void _substitute_function(const char* src, const char* dst) {
+  Printf("_substitute_function; src, dst: %p, %p\n", src, dst);
   assert(AddrIsInMem((uptr)src));
   uptr shadow = MemToShadow((uptr)src);
   const char **shadowPtr = reinterpret_cast<const char **>(shadow);
-  Printf("insert; shadowPtr: %p\n", shadowPtr);
+  Printf("_substitute_function; shadowPtr: %p\n", shadowPtr);
   *shadowPtr = dst;
 }
-
-} // fake
-
-extern "C" {
 
 void *__fake_hook(void *callee) {
   debug_printf("__fake_hook; callee: %p\n", callee);
