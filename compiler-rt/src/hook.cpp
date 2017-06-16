@@ -14,7 +14,7 @@ using uptr = unsigned long long;
 static_assert(sizeof(u64) == 8, "");
 static_assert(sizeof(uptr) == 8, "");
 
-static const u64 N = 16;
+static const u64 N = 8;
 
 static const u64 kLinuxLowMemEnd = 0x00007fff7fff;
 static const u64 kLinuxHighMemBeg = 0x7f0000000000;
