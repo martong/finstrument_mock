@@ -54,12 +54,7 @@ static const u64 kOSXLowShadowOffset = kOSXLowMemEnd + 1;
 #define kHighShadowBeg MEM_TO_SHADOW(kHighMemBeg)
 #define kHighShadowEnd (MEM_TO_SHADOW(kHighMemEnd + 1) - 1)
 
-void Printf(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  fprintf(stderr, format, args);
-  va_end(args);
-}
+#define Printf(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
 
 void PrintAddressSpaceLayout() {
   Printf("|| `[%p, %p]` || HighMem    ||\n", (void *)kHighMemBeg,
