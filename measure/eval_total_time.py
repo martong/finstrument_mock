@@ -8,18 +8,28 @@ import matplotlib.pyplot as plt
 import argparse
 
 
+rc('text', usetex=True)
+rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
+matplotlib.rcParams.update({'font.size': 14})
+
+
 def plot(csetup, value, name):
     ind = np.arange(len(csetup)) + .5
     plt.barh(ind, value, align='center', height=0.6)
     plt.yticks(ind, csetup)
 
-    plt.title(name)
+    #plt.title(name)
     plt.xlabel('seconds')
     #plt.ylabel('compiler setup')
 
-    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    plt.show()
+    #plt.show()
+    #return
+    filename = name.replace(' ', '-')
+    plt.savefig(filename + '.pdf', format='pdf', dpi=400)
+    # Must reset the plt when exporting multiple files after each other
+    plt.clf()
 
 
 # Returns a dict for a result file

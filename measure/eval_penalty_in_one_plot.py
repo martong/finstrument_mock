@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 
+rc('text', usetex=True)
+rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
+matplotlib.rcParams.update({'font.size': 12})
 
 def plot(results):
     penalty_names = results[0][1].keys()
@@ -35,9 +38,12 @@ def plot(results):
     #plt.xlabel('seconds')
     #plt.ylabel('compiler setup')
 
-    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    plt.show()
+    #plt.show()
+    plt.savefig('abstraction_penalty.pdf', format='pdf', dpi=400)
+    plt.clf()
 
 
 # Returns a dict for a result file
