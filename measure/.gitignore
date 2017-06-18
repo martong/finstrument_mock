@@ -1,0 +1,7 @@
+machine
+stepanov_abstraction
+stepanov_vector
+loop_unroll
+simple_types_loop_invariant
+functionobjects
+simple_types_constant_folding
