@@ -22,6 +22,10 @@ def plot(csetup, value, name):
     plt.show()
 
 
+# Returns a dict for a result file
+#  key: e.g. 'Total absolute time for Vector accumulate'
+#  value: a pair (time, compiler setup deduced from the dir name)
+#    e.g (12.21, '-O0 -finstrument-functions')
 def parse_result_file(filename):
     result = {}
     with open(filename) as f:
@@ -46,6 +50,10 @@ def parse_result_file(filename):
     return result
 
 
+# Returns a dict for all measurement results
+#  key: e.g. 'Total absolute time for Vector accumulate'
+#  value: a list of tuples of (time, compiler setup)
+#    e.g. [(3.03, '-O0'), (12.21, '-O0 -finstrument-functions')]
 def get_all_results():
     for dirpath, dirs, files in os.walk("."):
         results = {}
