@@ -650,8 +650,12 @@ ninja
 # execute tests
 ctest
 ```
-Once you have the compiler runtime and all the tests are passing then you might put the built library into one of the system library paths, so you could easily link other projects against it.
-For instance, on OSX I put it under `/usr/local/lib`.
+In your project setup the new compiler and link with the library.
+E.g. in a Makefile:
+```
+CXX=/Users/mg/Work/finstrument_mock/compiler/build.debug/bin/clang++
+LDFLAGS = $(LDFLAGS) -rpath $PROJ/rt/finstrument_mock/build/compiler-rt/ -L $PROJ/rt/finstrument_mock/build/compiler-rt/ -lmock_san
+```
 
 ## Usage
 Set up your project to use the modified compiler and link against the runtime library.
@@ -659,8 +663,9 @@ Put the header file of the runtime library into the include path of your project
 Use the `-fno-inline-functions -fsanitize=mock` switches to instrument all call expressions.
 
 Test setup is pretty straightforward:
-Use `::fake::clear()` to clear the substitutions.
-Use `SUBSTITUTE(&from, &to)` to register a test double.
+Use `_clear_function_substitutions` to clear the substitutions.
+In C use `_substitute_function` to replace functions.
+In C++ use `SUBSTITUTE(&from, &to)` to replace free or non-virtual member functions, use `SUBSTITUTE_VIRTUAL` to replace virtual functions.
 
 In case of free functions, the signature of `from` and `to` must be identical.
 Unfortunately we don't assert on this currently (see future work).
@@ -669,7 +674,7 @@ In case of member functions the test double's signature must have the same signa
 The first argument must be a pointer to the type whose member we are replacing.
 
 ### Virtual functions
-To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` macro, which requires a pointer to a (dummy) instance of the class which has the virtual function.
+To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` function template, which requires a pointer to a (dummy) instance of the class which has the virtual function.
 
 #### Replace virtual functions
 
