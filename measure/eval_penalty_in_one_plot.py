@@ -12,6 +12,7 @@ rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
 matplotlib.rcParams.update({'font.size': 12})
 
 def plot(results):
+    plt.figure(figsize=(8,9))
     penalty_names = results[0][1].keys()
     print penalty_names
     ind = np.arange(len(penalty_names)) + .5
@@ -20,9 +21,9 @@ def plot(results):
     hatches = ['////', '\\\\\\\\', '+++', 'xxx', 'ooo', 'O']
     i = 0
     fi = 0.0
-    height = 0.8 / len(results)  # keep 0.2 for place between each penalty
+    height = 0.6 / len(results)  # keep 0.2 for place between each penalty
     # with align='edge' -0.5 offset would put to the bottom of the penalty
-    offset = -0.4
+    offset = -0.3
     for penalty_name, result in results:
         plt.barh(ind + offset + fi, result.values(), align='edge',
                  height=height, color=colors[i], hatch=hatches[i],
@@ -41,7 +42,7 @@ def plot(results):
     #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    #plt.show()
+    plt.show()
     plt.savefig('abstraction_penalty.pdf', format='pdf', dpi=400)
     plt.clf()
 
@@ -71,7 +72,6 @@ def plot_all_results():
     results = []
     for dir in [
         'O2',
-        'O0',
         'O2__fsanitize_mock',
         'O2__fsanitize_mock__fno-inline-functions',
         'O2__finstrument-functions'
