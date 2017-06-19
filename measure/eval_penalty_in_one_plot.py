@@ -35,7 +35,7 @@ def plot(results):
 
     plt.legend(loc='upper right', shadow=True, fontsize='medium',
                # to put the legend out of plot
-               #bbox_to_anchor=(1.1, 1.05)
+               bbox_to_anchor=(1.06, 1.00)
                )
 
     #plt.title(name)
@@ -78,7 +78,8 @@ def plot_all_results():
         'O2',
         'O2__fsanitize_mock',
         'O2__fsanitize_mock__fno-inline-functions',
-        'O2__finstrument-functions'
+        'O2__finstrument-functions',
+        'O2__finstrument-functions__fno-inline-functions',
     ]:
         result_file = os.path.join(dir, "report.txt")
         print result_file
