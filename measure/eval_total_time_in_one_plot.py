@@ -34,8 +34,9 @@ def plot(normalizedResults):
     #plt.legend(loc='upper right', shadow=True, fontsize='medium')
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    plt.show()
-    plt.savefig('noramalized_total_absoulte_times.pdf', format='pdf', dpi=400)
+    # Either show or save, save after show results in an empty pdf
+    #plt.show()
+    plt.savefig('normalized_total_absolute_times.pdf', format='pdf', dpi=400)
     plt.clf()
 
 

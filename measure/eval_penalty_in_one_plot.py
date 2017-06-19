@@ -9,10 +9,10 @@ import argparse
 
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
-matplotlib.rcParams.update({'font.size': 12})
+matplotlib.rcParams.update({'font.size': 14})
 
 def plot(results):
-    plt.figure(figsize=(8,9))
+    plt.figure(figsize=(9,9))
     penalty_names = results[0][1].keys()
     print penalty_names
     ind = np.arange(len(penalty_names)) + .5
@@ -33,7 +33,10 @@ def plot(results):
 
     plt.yticks(ind, penalty_names)
 
-    plt.legend(loc='upper right', shadow=True, fontsize='medium')
+    plt.legend(loc='upper right', shadow=True, fontsize='medium',
+               # to put the legend out of plot
+               #bbox_to_anchor=(1.1, 1.05)
+               )
 
     #plt.title(name)
     #plt.xlabel('seconds')
@@ -42,7 +45,8 @@ def plot(results):
     #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    plt.show()
+    #plt.show()
+    #return
     plt.savefig('abstraction_penalty.pdf', format='pdf', dpi=400)
     plt.clf()
 
