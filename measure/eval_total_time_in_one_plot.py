@@ -74,8 +74,8 @@ def get_all_results():
         for dir in [
             'O0__finstrument-functions__fno-inline-functions',
             'O0__finstrument-functions',
-            'O0__fsanitize_mock',
             'O0__fsanitize_mock__fno-inline-functions',
+            'O0__fsanitize_mock',
             'O0',
             'O2__finstrument-functions__fno-inline-functions',
             'O2__finstrument-functions',
