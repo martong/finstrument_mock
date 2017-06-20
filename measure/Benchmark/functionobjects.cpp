@@ -274,6 +274,12 @@ int main(int argc, char* argv[])
 	
 #ifdef SUB
 	SUBSTITUTE(&verify_sorted<decltype(table)>, &verify_sorted<decltype(table)>);
+	SUBSTITUTE(&less_than_function1, &less_than_function1);
+	SUBSTITUTE(&less_than_function2, &less_than_function2);
+	SUBSTITUTE(&less_than_functor::operator(), &less_than_functor::operator());
+	SUBSTITUTE(&inline_less_than_functor::operator(),
+			&inline_less_than_functor::operator());
+	SUBSTITUTE(&less<double>::operator(), &less<double>::operator());
 #endif
 	
 	// here is where the timing starts
