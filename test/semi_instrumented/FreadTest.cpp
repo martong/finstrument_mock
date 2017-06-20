@@ -11,7 +11,7 @@ FILE f;
 
 FILE *fake_fopen(const char *, const char *) { return &f; }
 
-std::array<double, SIZE> a = {1., 2., 3., 4., 5.};
+std::array<double, SIZE> a = {{1., 2., 3., 4., 5.}};
 size_t fake_fread(void *buf, size_t, size_t count, FILE *) {
     assert(count == SIZE);
     double *b = reinterpret_cast<double *>(buf);
