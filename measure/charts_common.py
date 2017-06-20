@@ -4,7 +4,8 @@ import matplotlib
 
 def init():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save", help="save figures")
+    parser.add_argument("--save", help="save figures",
+                        action='store_true', default=False)
     args = parser.parse_args()
 
     if args.save:
