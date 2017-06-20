@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
 	test_accumulate(rtrvdpb, rtrvdpe, dZero, "double vector reverse_iterator reverse");
 	test_accumulate(rtrtvdpb, rtrtvdpe, dZero, "double vector iterator reverse reverse");
 
-	summarize("Vector accumulate", SIZE, iterations, kShowGMeans, kShowPenalty );
+	summarize("Vector Accumulate", SIZE, iterations, kShowGMeans, kShowPenalty );
 
 
 
