@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 
 import os
-from matplotlib import rc
-import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-import argparse
+import charts_common as cs
 
-
-rc('text', usetex=True)
-rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
-matplotlib.rcParams.update({'font.size': 14})
-
-
-def plot(normalizedResults):
-    plt.figure(figsize=(8,7))
+def plot(normalizedResults, save):
+    plt.figure(figsize=(9,8))
     csetups = normalizedResults[0][2]
     ind = np.arange(len(csetups)) + .5
     i = 0
@@ -35,9 +27,11 @@ def plot(normalizedResults):
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
     # Either show or save, save after show results in an empty pdf
-    #plt.show()
-    plt.savefig('normalized_total_absolute_times.pdf', format='pdf', dpi=400)
-    plt.clf()
+    if save:
+        plt.savefig('normalized_total_absolute_times.pdf', format='pdf', dpi=400)
+        plt.clf()
+    else:
+        plt.show()
 
 
 # Returns a dict for a result file
@@ -47,7 +41,7 @@ def plot(normalizedResults):
 def parse_result_file(filename):
     result = {}
     with open(filename) as f:
-        compiler_setup = "-" + filename.split(
+        compiler_setup = filename.split(
             "/")[0].replace("__", " -").replace("_mock", "=mock")
         for line in f:
             key = ""
@@ -72,16 +66,20 @@ def get_all_results():
     for dirpath, dirs, files in os.walk("."):
         results = {}
         for dir in [
-            'O0__finstrument-functions__fno-inline-functions',
-            'O0__finstrument-functions',
-            'O0__fsanitize_mock__fno-inline-functions',
-            'O0__fsanitize_mock',
-            'O0',
-            'O2__finstrument-functions__fno-inline-functions',
-            'O2__finstrument-functions',
-            'O2__fsanitize_mock__fno-inline-functions',
-            'O2__fsanitize_mock',
-            'O2',
+            '__O0__finstrument-functions__fno-inline-functions',
+            '__O0__finstrument-functions',
+            '__O0__fsanitize_mock__fno-inline-functions__DSUB',
+            '__O0__fsanitize_mock__fno-inline-functions',
+            '__O0__fsanitize_mock__DSUB',
+            '__O0__fsanitize_mock',
+            '__O0',
+            '__O2__finstrument-functions__fno-inline-functions',
+            '__O2__finstrument-functions',
+            '__O2__fsanitize_mock__fno-inline-functions__DSUB',
+            '__O2__fsanitize_mock__fno-inline-functions',
+            '__O2__fsanitize_mock__DSUB',
+            '__O2__fsanitize_mock',
+            '__O2',
         ]:
             result_file = os.path.join(dir, "report.txt")
             print result_file
@@ -93,6 +91,7 @@ def get_all_results():
                     results[key] = [Value]
         return results
 
+args = cs.init()
 results = get_all_results()
 
 # Normalize results into a list of
@@ -106,4 +105,4 @@ for test_name, Value in results.iteritems():
     normalizedResults.append((test_name, values, csetup))
 
 print(normalizedResults)
-plot(normalizedResults)
+plot(normalizedResults, args.save)

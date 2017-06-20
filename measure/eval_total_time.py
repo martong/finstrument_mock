@@ -1,16 +1,9 @@
 #!/usr/bin/env python
 
 import os
-from matplotlib import rc
-import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-import argparse
-
-rc('text', usetex=True)
-rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
-matplotlib.rcParams.update({'font.size': 14})
-
+import charts_common as cs
 
 def plot(csetup, value, name, save):
     ind = np.arange(len(csetup)) + .5
@@ -39,8 +32,8 @@ def plot(csetup, value, name, save):
 def parse_result_file(filename):
     result = {}
     with open(filename) as f:
-        compiler_setup = "-" + filename.split(
-            "/")[0].replace("__", " -").replace("_mock", "=mock")
+        compiler_setup = filename.split(
+            "/")[0].replace("__", " -").replace("_mock", "=mock").lstrip()
         for line in f:
             key = ""
             value = -1.0
@@ -68,9 +61,7 @@ def get_all_results():
     for dirpath, dirs, files in os.walk("."):
         results = {}
         for dir in dirs:
-            if dir.startswith('.'):
-                continue
-            if dir.startswith('_'):
+            if not dir.startswith('__'):
                 continue
             result_file = os.path.join(dir, "report.txt")
             print result_file
@@ -82,9 +73,7 @@ def get_all_results():
                     results[key] = [Value]
         return results
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--save", help="save figures")
-args = parser.parse_args()
+args = cs.init()
 
 results = get_all_results()
 for key, Value in results.iteritems():
