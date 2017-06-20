@@ -7,13 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 
-
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
 matplotlib.rcParams.update({'font.size': 14})
 
 
-def plot(csetup, value, name):
+def plot(csetup, value, name, save):
     ind = np.arange(len(csetup)) + .5
     plt.barh(ind, value, align='center', height=0.6)
     plt.yticks(ind, csetup)
@@ -24,12 +23,13 @@ def plot(csetup, value, name):
 
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    #plt.show()
-    #return
-    filename = name.replace(' ', '-')
-    plt.savefig(filename + '.pdf', format='pdf', dpi=400)
-    # Must reset the plt when exporting multiple files after each other
-    plt.clf()
+    if save:
+        filename = name.replace(' ', '-')
+        plt.savefig(filename + '.pdf', format='pdf', dpi=400)
+        # Must reset the plt when exporting multiple files after each other
+        plt.clf()
+    else:
+        plt.show()
 
 
 # Returns a dict for a result file
@@ -82,6 +82,10 @@ def get_all_results():
                     results[key] = [Value]
         return results
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--save", help="save figures")
+args = parser.parse_args()
+
 results = get_all_results()
 for key, Value in results.iteritems():
     print Value
@@ -93,5 +97,5 @@ for key, Value in results.iteritems():
     print "csetup:"
     print csetup
     print "TITLE: ", key
-    plot(csetup, values, key)
+    plot(csetup, values, key, args.save)
     #exit(0)
