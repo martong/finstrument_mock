@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import charts_common as cs
 
 def plot(normalizedResults, save):
-    plt.figure(figsize=(9,8))
+    plt.figure(figsize=(8,8))
     csetups = normalizedResults[0][2]
     ind = np.arange(len(csetups)) + .5
     i = 0

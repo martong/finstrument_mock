@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import charts_common as cs
 
 def plot(results, save):
-    plt.figure(figsize=(9,10))
+    plt.figure(figsize=(9.5,10))
     penalty_names = results[0][1].keys()
     print penalty_names
     ind = np.arange(len(penalty_names)) + .5
@@ -31,7 +31,7 @@ def plot(results, save):
 
     plt.legend(loc='upper right', shadow=True, fontsize='medium',
                # to put the legend out of plot
-               #bbox_to_anchor=(1.06, 1.00)
+               bbox_to_anchor=(1.04, 1.00)
                )
 
     #plt.title(name)
