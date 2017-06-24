@@ -26,9 +26,9 @@ def plot(normalizedResults, save):
     #plt.legend(loc='upper right', shadow=True, fontsize='medium')
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
-    # Either show or save, save after show results in an empty pdf
+    # Either show or save, save after show results in an empty eps
     if save:
-        plt.savefig('normalized_total_absolute_times.pdf', format='pdf', dpi=400)
+        plt.savefig('normalized_total_absolute_times.eps', format='eps', dpi=400)
         plt.clf()
     else:
         plt.show()

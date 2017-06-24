@@ -42,7 +42,7 @@ def plot(results, save):
     plt.tight_layout(pad=2.4, w_pad=0.5, h_pad=1.0)
 
     if save:
-        plt.savefig('abstraction_penalty.pdf', format='pdf', dpi=400)
+        plt.savefig('abstraction_penalty.eps', format='eps', dpi=400)
         plt.clf()
     else:
         plt.show()

@@ -18,7 +18,7 @@ def plot(csetup, value, name, save):
 
     if save:
         filename = name.replace(' ', '-')
-        plt.savefig(filename + '.pdf', format='pdf', dpi=400)
+        plt.savefig(filename + '.eps', format='eps', dpi=400)
         # Must reset the plt when exporting multiple files after each other
         plt.clf()
     else:
