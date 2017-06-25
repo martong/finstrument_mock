@@ -52,6 +52,13 @@ MockTurtle& GetMockObject(Turtle* self) {
     return *it->second.get();
 }
 
+// in case of one object
+//MockTurtle& GetMockObject(Turtle*) {
+    //static MockTurtle m;
+    //return m;
+//}
+
+
 namespace proxy {
     void GoTo(Turtle* self, int x, int y) {
         return GetMockObject(self).GoTo(x, y);
