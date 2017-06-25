@@ -393,7 +393,8 @@ The call to `__fake_hook` resolves in runtime if we should replace the callee to
 If the function does return anything other than `void`:
 ```c++
 char* funptr = __fake_hook(&foo);
-auto ret = result_of(&foo);
+using ReturnType = decltype(foo(args...);
+ReturnType ret;
 if (funptr) {
     ret = funptr(args...);
 } else {
@@ -440,7 +441,7 @@ cont:                                             ; preds = %else, %then
   ret i32 %call_res.0
 }
 ```
-Actually the IR is much more verbose if optimization is not enabled, therefore
+Actually, the IR is much more verbose if optimization is not enabled, therefore
 it is a good idea to use `-O2`.
 
 ### Constexpr functions
