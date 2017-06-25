@@ -1,11 +1,6 @@
 # Instrumentation for testing
 
 * [Introduction](#introduction)
-   * [Alternatives](#alternatives)
-      * [Link Seams](#link-seams)
-      * [Preprocessor Seams](#preprocessor-seams)
-      * [Object and Compile Seams](#object-and-compile-seams)
-      * [Isolator  ](#isolator)
 * [Motivating Examples](#motivating-examples)
    * [Replace template functions](#replace-template-functions)
    * [Replace functions in class templates](#replace-functions-in-class-templates)
@@ -27,108 +22,17 @@
 * [Future work](#future-work)
    * [Compile time reflection](#compile-time-reflection)
 * [Outlook](#outlook)
+* [Alternatives](#alternatives)
+  * [Link Seams](#link-seams)
+  * [Preprocessor Seams](#preprocessor-seams)
+  * [Object and Compile Seams](#object-and-compile-seams)
+  * [Isolator  ](#isolator)
 * [Acknowledgement](#acknowledgement)
 
 ## Introduction
 There are many legacy enterprise applications that were written without automated unit tests. It is often very difficult to maintain and modify such code, since we cannot verify the changes. A frequently used approach in this situation is to write additional tests without modifying the original source code. There are several techniques to do this ([Alternatives](#alternatives)). However, these techniques have their own limitations and disadvantages.
 
 My aim is to provide an alternative technique without those limitations. I used the Clang compiler sanitizer infrastructure to implement testing specific instrumentation (prototype). The instrumentation makes it possible to replace any C/C++ function with a corresponding test double function.
-
-### Alternatives
-Currently in C/C++ we have techniques to test without modifying the original source code: using a seam.
-A *seam* is an abstract concept introduced by Feathers [1] as an instrument via we can alter the behaviour of our unit without changing its source code.
-There are four different kind of seams in C++ [2]:
-* Link seam: Change the definition of a function via some linker specific setup.
-* Preprocessor seam: With the help of the preprocessor, redefine function names to use an alternative implementation.
-* Object seam: Based on inheritance to inject a subclass with an alternative implementation.
-* Compile seam: Inject dependencies at compile-time through template parameters.
-
-The *enabling point* of a seam is the place where we can make the decision to use one behavior or another.
-Different seams have different enabling points.
-
-[1] Michael Feathers, Working Effectively with Legacy Code, 2004<br/>
-[2] https://accu.org/index.php/journals/1927
-
-#### Link Seams
-We can use a link seam, e.g. to replace the implementation of a free function or a member function.
-For instance:
-```c++
-// A.hpp
-void foo();
-// A.cpp
-void foo() { ... };
-// MockA.cpp
-void foo() { ... };
-// B.cpp
-#include "A.hpp"
-void bar() { foo(); ... }
-```
-In one hand, when we would test the `bar()` function then we would link the test executable with the `MockA.o` object file.
-On the other hand, we would link the production code with `A.o`.
-More information on how to use link seams in practice:
-* http://jayconrod.com/posts/23/tutorial-function-interposition-in-linux
-* http://samanbarghi.com/blog/2014/09/05/how-to-wrap-a-system-call-libc-function-in-linux/
-* http://stackoverflow.com/questions/31131163/how-to-hook-all-linux-system-calls-during-a-binary-execution
-
-Link-time dependency replacement is not possible if the dependency is defined in a static library or in the same translation unit where the SUT is defined.
-It is also not feasible to use link seams if the dependency is implemented as an inline function.
-This makes the use of this seam cumbersome or impossible when the dependant unit is a template or when the dependency is a template.
-The enabling point for a link seam is always outside of the program text.
-This makes the use of link seams somewhat hard to notice.
-On top of all, link-time substitution requires strong support from the build system we are using.
-Thus, we might have to specialize the building of the tests for each and every unit.
-This does not scale well and can be really demanding regarding to maintenance.
-
-As a summary, the major limitations of link seams are that we cannot use them with:
-* static libraries
-* header only libraries
-* inline functions
-* templates
-
-#### Preprocessor Seams
-Preprocessor seams can be applied to replace the invocation of a global function to an invocation of a test double.
-Let's consider the following code snippet:
-```c++
-void *my_malloc(size_t size) {
-  //...
-  return malloc(size);
-}
-
-void my_free(void *p) {
-  //...
-  return free(p);
-}
-
-#define free my_free
-#define malloc my_malloc
-
-void unitUnderTest() {
-  int *array = (int *)malloc(4 * sizeof(int));
-  // do something with array
-  free(array);
-}
-```
-We can replace the standard `malloc()` and `free()` functions with our own implementation.
-One example usage can be to collect statistics or do sanity checks in `my_malloc` and `my_free` functions.
-These seams can be applied conveniently in C, but not in C++.
-As soon as we are using namespaces, then the preprocessor might generate code which cannot be compiled because of ambiguous use of names.
-Dangerous side effects of macros are also well-known.
-
-#### Object and Compile Seams
-
-Object/compile seams are realized by introducing a runtime/compile-time interface.
-If we are lucky, then the unit we want to test depends only on the interface.
-In this case we can provide an alternative implementation for the test.
-
-However, in legacy code it is quite often that the dependency is hardwired to a specific implementation.
-In these cases, using an object or compile seam would require instrusive changes in the original source code (e.g. adding a new interface and a setter/constructor).
-Consequently, there are numerous situations when we cannot use object and compile seams.
-
-#### Isolator++
-With Isolator++ one can create non-intrusive tests on Windows, but Windows only.
-https://www.typemock.com/isolatorpp-product-page
-The project is closed source and commercial, therefore we cannot know what technology (or seam) they use.
-Perhaps they use runtime instrumentation to alter the behaviour of the unit.
 
 ## Motivating Examples
 The below examples are actually working code extracts of the tests from this repository.
@@ -789,6 +693,103 @@ Though, this kind of compile time reflection would be a nice complement of the i
 
 ## Outlook
 More about non-intrusive testing [here](https://www.youtube.com/watch?v=U9Up_OfiW24).
+
+## Alternatives
+Currently in C/C++ we have techniques to test without modifying the original source code: using a seam.
+A *seam* is an abstract concept introduced by Feathers [1] as an instrument via we can alter the behaviour of our unit without changing its source code.
+There are four different kind of seams in C++ [2]:
+* Link seam: Change the definition of a function via some linker specific setup.
+* Preprocessor seam: With the help of the preprocessor, redefine function names to use an alternative implementation.
+* Object seam: Based on inheritance to inject a subclass with an alternative implementation.
+* Compile seam: Inject dependencies at compile-time through template parameters.
+
+The *enabling point* of a seam is the place where we can make the decision to use one behavior or another.
+Different seams have different enabling points.
+
+[1] Michael Feathers, Working Effectively with Legacy Code, 2004<br/>
+[2] https://accu.org/index.php/journals/1927
+
+### Link Seams
+We can use a link seam, e.g. to replace the implementation of a free function or a member function.
+For instance:
+```c++
+// A.hpp
+void foo();
+// A.cpp
+void foo() { ... };
+// MockA.cpp
+void foo() { ... };
+// B.cpp
+#include "A.hpp"
+void bar() { foo(); ... }
+```
+In one hand, when we would test the `bar()` function then we would link the test executable with the `MockA.o` object file.
+On the other hand, we would link the production code with `A.o`.
+More information on how to use link seams in practice:
+* http://jayconrod.com/posts/23/tutorial-function-interposition-in-linux
+* http://samanbarghi.com/blog/2014/09/05/how-to-wrap-a-system-call-libc-function-in-linux/
+* http://stackoverflow.com/questions/31131163/how-to-hook-all-linux-system-calls-during-a-binary-execution
+
+Link-time dependency replacement is not possible if the dependency is defined in a static library or in the same translation unit where the SUT is defined.
+It is also not feasible to use link seams if the dependency is implemented as an inline function.
+This makes the use of this seam cumbersome or impossible when the dependant unit is a template or when the dependency is a template.
+The enabling point for a link seam is always outside of the program text.
+This makes the use of link seams somewhat hard to notice.
+On top of all, link-time substitution requires strong support from the build system we are using.
+Thus, we might have to specialize the building of the tests for each and every unit.
+This does not scale well and can be really demanding regarding to maintenance.
+
+As a summary, the major limitations of link seams are that we cannot use them with:
+* static libraries
+* header only libraries
+* inline functions
+* templates
+
+### Preprocessor Seams
+Preprocessor seams can be applied to replace the invocation of a global function to an invocation of a test double.
+Let's consider the following code snippet:
+```c++
+void *my_malloc(size_t size) {
+  //...
+  return malloc(size);
+}
+
+void my_free(void *p) {
+  //...
+  return free(p);
+}
+
+#define free my_free
+#define malloc my_malloc
+
+void unitUnderTest() {
+  int *array = (int *)malloc(4 * sizeof(int));
+  // do something with array
+  free(array);
+}
+```
+We can replace the standard `malloc()` and `free()` functions with our own implementation.
+One example usage can be to collect statistics or do sanity checks in `my_malloc` and `my_free` functions.
+These seams can be applied conveniently in C, but not in C++.
+As soon as we are using namespaces, then the preprocessor might generate code which cannot be compiled because of ambiguous use of names.
+Dangerous side effects of macros are also well-known.
+
+### Object and Compile Seams
+
+Object/compile seams are realized by introducing a runtime/compile-time interface.
+If we are lucky, then the unit we want to test depends only on the interface.
+In this case we can provide an alternative implementation for the test.
+
+However, in legacy code it is quite often that the dependency is hardwired to a specific implementation.
+In these cases, using an object or compile seam would require instrusive changes in the original source code (e.g. adding a new interface and a setter/constructor).
+Consequently, there are numerous situations when we cannot use object and compile seams.
+
+### Isolator++
+With Isolator++ one can create non-intrusive tests on Windows, but Windows only.
+https://www.typemock.com/isolatorpp-product-page
+The project is closed source and commercial, therefore we cannot know what technology (or seam) they use.
+Perhaps they use runtime instrumentation to alter the behaviour of the unit.
+
 
 ## Acknowledgement
 Thanks to Imre Szekeres, Gábor Horváth, Péter Bolla, Máté Csákvári, Zoltán Porkoláb, Zsolt Parragi for all the discussions we had.
