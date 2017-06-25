@@ -1,6 +1,6 @@
 project(fully_instrumented)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fno-inline-functions -fsanitize=mock")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline-functions -fsanitize=mock")
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/compiler-rt/include)
 file(GLOB SOURCES "*.cpp")

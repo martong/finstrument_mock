@@ -1,6 +1,6 @@
 project(c_language)
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -fno-inline-functions -fsanitize=mock")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-inline-functions -fsanitize=mock")
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/compiler-rt/include)
 

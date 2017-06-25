@@ -1,6 +1,6 @@
 project(fully_instrumented)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline")
 add_definitions(-D_LIBCPP_MOCK_SAN=1)
 
 include_directories(.)
