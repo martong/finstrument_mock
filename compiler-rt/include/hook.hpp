@@ -46,6 +46,30 @@ template <typename T, typename U> void SUBSTITUTE(T src, U dst) {
 /// actually used ABI, but clang does not:
 /// https://llvm.org/bugs/show_bug.cgi?id=22121
 /// https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Bound-member-functions.html
+/// The following code works (does not abort) with GCC 8.0 HEAD:
+///
+/// struct C {
+///   virtual void foo() {}
+/// };
+/// struct D : C {
+///   void foo() override {}
+/// };
+///
+/// int main() {
+///   C *c = new C;
+///   C *d = new D;
+///
+///   auto abi_c_foo = address_of_virtual_fun(c, &C::foo);
+///   auto abi_d_foo = address_of_virtual_fun(d, &C::foo);
+///
+///   typedef void (*fptr)(D *);
+///   auto c_foo = (fptr)(&C::foo);
+///   auto d_foo = (fptr)(&D::foo);
+///
+///   assert((void *)abi_c_foo == (void *)c_foo);
+///   assert((void *)abi_d_foo == (void *)d_foo);
+/// }
+///
 ///
 /// Note, it would be
 /// better to have a compiler intrinsic which would simply return the adress of
