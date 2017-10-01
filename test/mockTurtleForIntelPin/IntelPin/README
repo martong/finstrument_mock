@@ -1,0 +1,6 @@
+How to build (Pin 3.2)
+- copy this directory under $path_to_pintool/source/tools
+- cd to that dir and type make
+
+Execute (example):
+../../../pin -t obj-intel64/TurtleReplaceFun.so -- /media/sf_Work/finstrument_mock/rt/finstrument_mock/build_LINUX/debug/test/mockTurtleForIntelPin/mock_turtle_pin
