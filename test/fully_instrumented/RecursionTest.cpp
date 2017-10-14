@@ -19,6 +19,6 @@ namespace {
 }
 
 TEST_F(FooFixture, Recursion) {
-    SUBSTITUTE(&bar, &fake_bar);
+    SUBSTITUTE(bar, fake_bar);
     EXPECT_EQ(foo(), 26);
 }

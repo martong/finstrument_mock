@@ -1,6 +1,6 @@
 #include "FooFixture.hpp"
 
-struct DynamicType : FooFixture {};
+struct DynamicTypeWithFunctionId : FooFixture {};
 
 namespace {
 namespace Basic {
@@ -18,14 +18,13 @@ Values D_fake_foo(D*, int p) { return Values::FD; }
 } // namespace Basic
 } // namespace unnamed
 
-TEST_F(DynamicType, Basic_D) {
+TEST_F(DynamicTypeWithFunctionId, Basic_D) {
     using Basic::B;
     using Basic::D;
     using Basic::D_fake_foo;
     using Basic::Values;
 
-    B* dummy = new D;
-    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
+    SUBSTITUTE(D::foo, D_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::B);
@@ -36,14 +35,13 @@ TEST_F(DynamicType, Basic_D) {
     }
 }
 
-TEST_F(DynamicType, Basic_B) {
+TEST_F(DynamicTypeWithFunctionId, Basic_B) {
     using Basic::B;
     using Basic::D;
     using Basic::B_fake_foo;
     using Basic::Values;
 
-    B* dummy = new B;
-    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
+    SUBSTITUTE(B::foo, B_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::FB);
@@ -72,15 +70,14 @@ Values D_fake_foo(D*, int p) { return Values::FD; }
 }
 }
 
-TEST_F(DynamicType, InheritanceChain_D) {
+TEST_F(DynamicTypeWithFunctionId, InheritanceChain_D) {
     using InheritanceChain::Values;
     using InheritanceChain::B;
     using InheritanceChain::C;
     using InheritanceChain::D;
     using InheritanceChain::D_fake_foo;
 
-    B* dummy = new D;
-    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
+    SUBSTITUTE(D::foo, D_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::B);
@@ -95,15 +92,14 @@ TEST_F(DynamicType, InheritanceChain_D) {
     }
 }
 
-TEST_F(DynamicType, InheritanceChain_C) {
+TEST_F(DynamicTypeWithFunctionId, InheritanceChain_C) {
     using InheritanceChain::Values;
     using InheritanceChain::B;
     using InheritanceChain::C;
     using InheritanceChain::D;
     using InheritanceChain::C_fake_foo;
 
-    B* dummy = new C;
-    SUBSTITUTE_VIRTUAL(&C::foo, dummy, &C_fake_foo);
+    SUBSTITUTE(C::foo, C_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::B);
@@ -118,15 +114,14 @@ TEST_F(DynamicType, InheritanceChain_C) {
     }
 }
 
-TEST_F(DynamicType, InheritanceChain_B) {
+TEST_F(DynamicTypeWithFunctionId, InheritanceChain_B) {
     using InheritanceChain::Values;
     using InheritanceChain::B;
     using InheritanceChain::C;
     using InheritanceChain::D;
     using InheritanceChain::B_fake_foo;
 
-    B* dummy = new B;
-    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
+    SUBSTITUTE(B::foo, B_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::FB);
@@ -159,15 +154,14 @@ Values D_fake_foo(D*, int p) { return Values::FD; }
 }
 }
 
-TEST_F(DynamicType, MultipleInheritance_D) {
+TEST_F(DynamicTypeWithFunctionId, MultipleInheritance_D) {
     using MultipleInheritance::Values;
     using MultipleInheritance::B;
     using MultipleInheritance::C;
     using MultipleInheritance::D;
     using MultipleInheritance::D_fake_foo;
 
-    B* dummy = new D;
-    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
+    SUBSTITUTE(D::foo, D_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::B);
@@ -182,15 +176,14 @@ TEST_F(DynamicType, MultipleInheritance_D) {
     }
 }
 
-TEST_F(DynamicType, MultipleInheritance_C) {
+TEST_F(DynamicTypeWithFunctionId, MultipleInheritance_C) {
     using MultipleInheritance::Values;
     using MultipleInheritance::B;
     using MultipleInheritance::C;
     using MultipleInheritance::D;
     using MultipleInheritance::C_fake_foo;
 
-    C* dummy = new C;
-    SUBSTITUTE_VIRTUAL(&C::foo, dummy, &C_fake_foo);
+    SUBSTITUTE(C::foo, C_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::B);
@@ -205,15 +198,14 @@ TEST_F(DynamicType, MultipleInheritance_C) {
     }
 }
 
-TEST_F(DynamicType, MultipleInheritance_B) {
+TEST_F(DynamicTypeWithFunctionId, MultipleInheritance_B) {
     using MultipleInheritance::Values;
     using MultipleInheritance::B;
     using MultipleInheritance::C;
     using MultipleInheritance::D;
     using MultipleInheritance::B_fake_foo;
 
-    B* dummy = new B;
-    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
+    SUBSTITUTE(B::foo, B_fake_foo);
     {
         B* b0 = new B;
         EXPECT_EQ(b0->foo(1), Values::FB);
@@ -254,7 +246,7 @@ Values C2_fake_foo(C2*) { return Values::FC2; }
 
 // Inspired from isocpp cpp FAQ:
 // https://isocpp.org/wiki/faq/multiple-inheritance#mi-delegate-to-sister
-TEST_F(DynamicType, Dreaded) {
+TEST_F(DynamicTypeWithFunctionId, Dreaded) {
     using Dreaded::B;
     using Dreaded::C1;
     using Dreaded::C2;
@@ -269,8 +261,7 @@ TEST_F(DynamicType, Dreaded) {
     }
 
     {
-        C2* dummy = new C2();
-        SUBSTITUTE_VIRTUAL(&C2::bar, dummy, C2_fake_foo);
+        SUBSTITUTE(C2::bar, C2_fake_foo);
 
         D* p1 = new D();
         EXPECT_EQ(p1->foo(), Values::FC2);
@@ -311,7 +302,7 @@ Values C2_fake_foo(C2*) { return Values::FC2; }
 
 // Inspired from isocpp cpp FAQ:
 // https://isocpp.org/wiki/faq/multiple-inheritance#mi-delegate-to-sister
-TEST_F(DynamicType, Dreaded2) {
+TEST_F(DynamicTypeWithFunctionId, Dreaded2) {
     using Dreaded2::B;
     using Dreaded2::C1;
     using Dreaded2::C2;
@@ -327,16 +318,14 @@ TEST_F(DynamicType, Dreaded2) {
     }
 
     {
-        C1* dummy = new C1();
-        SUBSTITUTE_VIRTUAL(&C1::foo, dummy, C1_fake_foo);
+        SUBSTITUTE(C1::foo, C1_fake_foo);
 
         B* p1 = new C1();
         EXPECT_EQ(p1->foo(), Values::FC1);
     }
 
     {
-        C2* dummy = new C2();
-        SUBSTITUTE_VIRTUAL(&C2::bar, dummy, C2_fake_foo);
+        SUBSTITUTE(C2::bar, C2_fake_foo);
 
         B* p1 = new C2();
         EXPECT_EQ(p1->bar(), Values::FC2);

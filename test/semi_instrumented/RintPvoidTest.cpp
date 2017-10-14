@@ -13,7 +13,7 @@ int fake_RintPvoid() {
 }
 
 TEST_F(FooFixture, RintPvoidReplaced) {
-    SUBSTITUTE(&RintPvoid, &fake_RintPvoid);
+    SUBSTITUTE(RintPvoid, fake_RintPvoid);
     auto res = RintPvoidCaller();
 
     EXPECT_EQ(::ftest::called.count(address(RintPvoid)), 0);

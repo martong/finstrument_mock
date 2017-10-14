@@ -8,7 +8,7 @@ _Complex double fake_RComplexPvoid(){
 }
 
 TEST_F(FooFixture, RComplexPvoid) {
-    SUBSTITUTE(&RComplexPvoid, &fake_RComplexPvoid);
+    SUBSTITUTE(RComplexPvoid, fake_RComplexPvoid);
     auto res = RComplexPvoidCaller();
 
     _Complex double expected = {2, 5};

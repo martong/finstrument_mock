@@ -29,11 +29,11 @@ int fake_fclose(FILE *) { return 0; }
 } // namespace t1
 
 TEST_F(FooFixture, FreadSumIsOk) {
-    SUBSTITUTE(&fopen, &t1::fake_fopen);
-    SUBSTITUTE(&fread, &t1::fake_fread);
-    SUBSTITUTE(&feof, &t1::fake_feof);
-    SUBSTITUTE(&ferror, &t1::fake_ferror);
-    SUBSTITUTE(&fclose, &t1::fake_fclose);
+    SUBSTITUTE(fopen, t1::fake_fopen);
+    SUBSTITUTE(fread, t1::fake_fread);
+    SUBSTITUTE(feof, t1::fake_feof);
+    SUBSTITUTE(ferror, t1::fake_ferror);
+    SUBSTITUTE(fclose, t1::fake_fclose);
 
     auto res = Fread();
     EXPECT_EQ(res, std::accumulate(t1::a.begin(), t1::a.end(), 0.0));
@@ -57,11 +57,11 @@ int fake_fclose(FILE *) { return 0; }
 } // namespace t2
 
 TEST_F(FooFixture, FreadHandles_feof) {
-    SUBSTITUTE(&fopen, &t2::fake_fopen);
-    SUBSTITUTE(&fread, &t2::fake_fread);
-    SUBSTITUTE(&feof, &t2::fake_feof);
-    SUBSTITUTE(&ferror, &t2::fake_ferror);
-    SUBSTITUTE(&fclose, &t2::fake_fclose);
+    SUBSTITUTE(fopen, t2::fake_fopen);
+    SUBSTITUTE(fread, t2::fake_fread);
+    SUBSTITUTE(feof, t2::fake_feof);
+    SUBSTITUTE(ferror, t2::fake_ferror);
+    SUBSTITUTE(fclose, t2::fake_fclose);
 
     EXPECT_THROW(Fread(), FeofE);
 }

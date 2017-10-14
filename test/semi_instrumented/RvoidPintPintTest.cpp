@@ -12,7 +12,7 @@ void fake_RvoidPintPint(int a0, int a1) {
 
 /// signature: void(int)
 TEST_F(FooFixture, RvoidPintPint) {
-    SUBSTITUTE(&RvoidPintPint, &fake_RvoidPintPint);
+    SUBSTITUTE(RvoidPintPint, fake_RvoidPintPint);
     RvoidPintPintCaller();
 
     EXPECT_EQ(::ftest::called.count(address(RvoidPintPint)), 0);

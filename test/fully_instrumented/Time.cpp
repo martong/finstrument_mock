@@ -77,8 +77,8 @@ bool reloadConfigCalled = false;
 void mock_reloadConfig() { reloadConfigCalled = true; }
 
 TEST(handleMessage, reloadConfig_shall_be_called_on_timeout) {
-    SUBSTITUTE(&time, &fake_time);
-    SUBSTITUTE(&reloadConfig, &mock_reloadConfig);
+    SUBSTITUTE(time, fake_time);
+    SUBSTITUTE(reloadConfig, mock_reloadConfig);
     handleMessage(Message());
     EXPECT_EQ(reloadConfigCalled, true);
 }

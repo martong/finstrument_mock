@@ -10,7 +10,7 @@ void fake_foo(X* self, int p){
     EXPECT_EQ(p, 13);
 }
 TEST_F(FooFixture, MemberCall) {
-    SUBSTITUTE(&X::foo, &fake_foo);
+    SUBSTITUTE(X::foo, fake_foo);
 
     MemberCaller(global_x, 13);
 
@@ -33,7 +33,7 @@ void fake_foo_2(X* self, int p){
     ++called;
 }
 TEST_F(FooFixture, MemberCall_two_objects) {
-    SUBSTITUTE(&X::foo, &fake_foo_2);
+    SUBSTITUTE(X::foo, fake_foo_2);
 
     MemberCaller(global_x, 13);
     MemberCaller(global_y, 17);

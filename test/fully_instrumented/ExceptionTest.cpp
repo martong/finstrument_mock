@@ -14,6 +14,6 @@ namespace {
 TEST_F(FooFixture, Exception) {
     EXPECT_NO_THROW(foo());
 
-    SUBSTITUTE(&bar, &fake_bar);
+    SUBSTITUTE(bar, fake_bar);
     EXPECT_THROW(foo(), BarE);
 }

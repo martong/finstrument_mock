@@ -12,7 +12,7 @@ constexpr int bar(int p) {
 } // unnamed
 
 TEST_F(FooFixture, Constexpr) {
-    SUBSTITUTE(&foo, &fake_foo);
+    SUBSTITUTE(foo, fake_foo);
 
     static_assert(foo(2) == 4, "");
     EXPECT_EQ(foo(2), 8);

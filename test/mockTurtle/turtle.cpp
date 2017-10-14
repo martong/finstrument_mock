@@ -85,13 +85,13 @@ namespace proxy {
 
 struct TurtleTest : ::testing::Test {
     TurtleTest() {
-        SUBSTITUTE(&Turtle::GoTo, &proxy::GoTo);
-        SUBSTITUTE(&Turtle::PenUp, &proxy::PenUp);
-        SUBSTITUTE(&Turtle::PenDown, &proxy::PenDown);
-        SUBSTITUTE(&Turtle::Forward, &proxy::Forward);
-        SUBSTITUTE(&Turtle::Turn, &proxy::Turn);
-        SUBSTITUTE(&Turtle::GetX, &proxy::GetX);
-        SUBSTITUTE(&Turtle::GetY, &proxy::GetY);
+        SUBSTITUTE(Turtle::GoTo, proxy::GoTo);
+        SUBSTITUTE(Turtle::PenUp, proxy::PenUp);
+        SUBSTITUTE(Turtle::PenDown, proxy::PenDown);
+        SUBSTITUTE(Turtle::Forward, proxy::Forward);
+        SUBSTITUTE(Turtle::Turn, proxy::Turn);
+        SUBSTITUTE(Turtle::GetX, proxy::GetX);
+        SUBSTITUTE(Turtle::GetY, proxy::GetY);
     }
 };
 

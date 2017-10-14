@@ -72,9 +72,9 @@ void test_accumulate(Iterator first, Iterator last, T zero, const char *label) {
 
 #ifdef SUB
 	// TODO FIX BUG, this causes SEGV
-	//SUBSTITUTE(&accumulate<Iterator, T>, &accumulate<Iterator, T>);
+	//SUBSTITUTE(accumulate<Iterator, T>, accumulate<Iterator, T>);
 
-	SUBSTITUTE(&check_sum, &check_sum);
+	SUBSTITUTE(check_sum, check_sum);
 #endif
 
 	start_timer();
@@ -93,7 +93,7 @@ void test_insertion_sort(Iterator firstSource, Iterator lastSource, Iterator fir
 	int i;
 
 #ifdef SUB
-	SUBSTITUTE(&verify_sorted<Iterator>, &verify_sorted<Iterator>);
+	SUBSTITUTE(verify_sorted<Iterator>, verify_sorted<Iterator>);
 #endif
 
 	start_timer();
@@ -115,7 +115,7 @@ void test_quicksort(Iterator firstSource, Iterator lastSource, Iterator firstDes
 	int i;
 
 #ifdef SUB
-	SUBSTITUTE(&verify_sorted<Iterator>, &verify_sorted<Iterator>);
+	SUBSTITUTE(verify_sorted<Iterator>, verify_sorted<Iterator>);
 #endif
 
 	start_timer();
@@ -137,7 +137,7 @@ void test_heap_sort(Iterator firstSource, Iterator lastSource, Iterator firstDes
 	int i;
 
 #ifdef SUB
-	SUBSTITUTE(&verify_sorted<Iterator>, &verify_sorted<Iterator>);
+	SUBSTITUTE(verify_sorted<Iterator>, verify_sorted<Iterator>);
 #endif
 
 	start_timer();

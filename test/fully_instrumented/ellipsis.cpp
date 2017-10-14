@@ -29,6 +29,6 @@ int mul_nums(int count, ...)
 TEST_F(FooFixture, Ellipsis) {
     EXPECT_EQ(add_nums(4, 1, 2, 3, 4), 10);
     EXPECT_EQ(mul_nums(4, 1, 2, 3, 4), 24);
-    SUBSTITUTE(&add_nums, &mul_nums);
+    SUBSTITUTE(add_nums, mul_nums);
     EXPECT_EQ(add_nums(4, 1, 2, 3, 4), 24);
 }

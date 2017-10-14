@@ -14,7 +14,7 @@ void fake_foo(int p) {
 void bar() { foo(13); };
 } // unnamed
 TEST_F(NoReturn, foo) {
-    SUBSTITUTE(&foo, &fake_foo);
+    SUBSTITUTE(foo, fake_foo);
     bar();
     EXPECT_EQ(::ftest::called.count(address(fake_foo)), 1);
 }
@@ -39,7 +39,7 @@ void fake_exit(int ec) {
 }
 
 TEST_F(NoReturn, parseCommandLineArgs) {
-    SUBSTITUTE(&std::exit, &fake_exit);
+    SUBSTITUTE(std::exit, fake_exit);
 
     /// argc mismatch
     exit_code = -1;

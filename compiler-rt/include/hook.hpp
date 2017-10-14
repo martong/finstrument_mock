@@ -4,6 +4,21 @@
 #include <cstdio>
 #include <cstddef>
 
+//template <typename T, typename U> void __SUBSTITUTE(T src, U dst) {
+  //_substitute_function((const char *)(src), (const char *)(dst));
+//}
+
+//#define SUBSTITUTE(src, dst)                                                   \
+  //do {                                                                         \
+    //__SUBSTITUTE(__function_id src, __function_id dst);                        \
+  //} while (0)
+
+#define SUBSTITUTE(src, dst)                                                   \
+  do {                                                                         \
+    _substitute_function((const char *)__function_id src,                      \
+                         (const char *)__function_id dst);                     \
+  } while (0)
+
 namespace fake {
 
 template <typename T> const char *address(T t) {
@@ -33,9 +48,9 @@ const char *address_of_virtual_fun(const Class *aClass, MemPtr memptr) {
 
 } // namespace fake
 
-template <typename T, typename U> void SUBSTITUTE(T src, U dst) {
-  _substitute_function(::fake::address(src), ::fake::address(dst));
-}
+//template <typename T, typename U> void SUBSTITUTE(T src, U dst) {
+  //_substitute_function(::fake::address(src), ::fake::address(dst));
+//}
 
 /// Virtual functions are problematic, because a pointer-to-member function
 /// has a different layout in case of virtual functions than in case of regular
@@ -79,7 +94,10 @@ template <typename T, typename U> void SUBSTITUTE(T src, U dst) {
 /// We get the address now according to the Itanium C++ ABI.
 /// https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
 /// https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
+
+// TODO Remove
 template <typename T, typename U, typename V>
+//[[ deprecated ]]
 void SUBSTITUTE_VIRTUAL(T src, const U &ptr_to_dummy_obj, V dst) {
   _substitute_function(
       ::fake::address_of_virtual_fun((ptr_to_dummy_obj), (src)),

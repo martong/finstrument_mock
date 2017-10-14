@@ -16,7 +16,7 @@ TEST_F(FooFixture, FunPointer1) {
 }
 
 TEST_F(FooFixture, FunPointer2) {
-    SUBSTITUTE(&foo, &fake_foo);
+    SUBSTITUTE(foo, fake_foo);
     baz();
     EXPECT_EQ(::ftest::called.count(address(foo)), 0);
     EXPECT_EQ(::ftest::called.count(address(fake_foo)), 1);
