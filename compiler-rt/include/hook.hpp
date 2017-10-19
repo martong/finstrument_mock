@@ -13,11 +13,22 @@
     //__SUBSTITUTE(__function_id src, __function_id dst);                        \
   //} while (0)
 
-#define SUBSTITUTE(src, dst)                                                   \
+#define SUBSTITUTE_BASE(src, dst)                                              \
   do {                                                                         \
     _substitute_function((const char *)__function_id src,                      \
                          (const char *)__function_id dst);                     \
   } while (0)
+
+#define SUBSTITUTE_OVERLOAD(signature, src, dst)                               \
+  do {                                                                         \
+    _substitute_function((const char *)__function_id src,                      \
+                         (const char *)__function_id dst);                     \
+  } while (0)
+
+// https://stackoverflow.com/questions/11761703/overloading-macro-on-number-of-arguments
+#define GET_MACRO(_1, _2, _3, NAME, ...) NAME
+#define SUBSTITUTE(...)                                                        \
+  GET_MACRO(__VA_ARGS__, SUBSTITUTE_OVERLOAD, SUBSTITUTE_BASE)(__VA_ARGS__)
 
 namespace fake {
 
