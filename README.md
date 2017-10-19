@@ -1,33 +1,33 @@
 # Instrumentation for testing
 
-* [Introduction](#introduction)
-* [Motivating Examples](#motivating-examples)
-   * [Replace template functions](#replace-template-functions)
-   * [Replace functions in class templates](#replace-functions-in-class-templates)
-   * [Replace (always inline) functions in STL](#replace-always-inline-functions-in-stl)
-   * [Replace calls in libc - fopen(), fread()](#replace-calls-in-libc---fopen-fread)
-   * [Replace system calls - time()](#replace-system-calls---time)
-   * [Eliminate death tests, replace [[noreturn]] functions](#eliminate-death-tests-replace-noreturn-functions)
-* [How does it work?](#how-does-it-work)
-   * [Constexpr functions](#constexpr-functions)
-   * [Virtual functions](#virtual-functions)
-* [How to build](#how-to-build)
-* [Usage](#usage)
-   * [Virtual functions](#virtual-functions-1)
-      * [Replace virtual functions](#replace-virtual-functions)
-   * [[[noreturn]] functions](#noreturn-functions)
-   * [Difficulties with libcxx and always_inline attribute](#difficulties-with-libcxx-and-always_inline-attribute)
-   * [How to access privates?](#how-to-access-privates)
-* [Performance](#performance)
-* [Future work](#future-work)
-   * [Compile time reflection](#compile-time-reflection)
-* [Outlook](#outlook)
-* [Alternatives](#alternatives)
-  * [Link Seams](#link-seams)
-  * [Preprocessor Seams](#preprocessor-seams)
-  * [Object and Compile Seams](#object-and-compile-seams)
-  * [Isolator  ](#isolator)
-* [Acknowledgement](#acknowledgement)
+* [Instrumentation for testing](#instrumentation-for-testing)
+  * [Introduction](#introduction)
+  * [Motivating Examples](#motivating-examples)
+     * [Replace template functions](#replace-template-functions)
+     * [Replace functions in class templates](#replace-functions-in-class-templates)
+     * [Replace (always inline) functions in STL](#replace-always-inline-functions-in-stl)
+     * [Replace calls in libc - fopen(), fread()](#replace-calls-in-libc---fopen-fread)
+     * [Replace system calls - time()](#replace-system-calls---time)
+     * [Eliminate death tests, replace [[noreturn]] functions](#eliminate-death-tests-replace-noreturn-functions)
+  * [How does it work?](#how-does-it-work)
+     * [Constexpr functions](#constexpr-functions)
+     * [Virtual functions](#virtual-functions)
+  * [How to build](#how-to-build)
+  * [Usage](#usage)
+     * [Virtual functions](#virtual-functions-1)
+     * [Overloaded functions](#overloaded-functions)
+     * [How to access privates?](#how-to-access-privates)
+     * [Difficulties with libcxx and always_inline attribute](#difficulties-with-libcxx-and-always_inline-attribute)
+  * [Performance](#performance)
+  * [Future work](#future-work)
+     * [Compile time reflection](#compile-time-reflection)
+  * [Outlook](#outlook)
+  * [Alternatives](#alternatives)
+     * [Link Seams](#link-seams)
+     * [Preprocessor Seams](#preprocessor-seams)
+     * [Object and Compile Seams](#object-and-compile-seams)
+     * [Isolator  ](#isolator)
+  * [Acknowledgement](#acknowledgement)
 
 ## Introduction
 There are many legacy enterprise applications that were written without automated unit tests. It is often very difficult to maintain and modify such code, since we cannot verify the changes. A frequently used approach in this situation is to write additional tests without modifying the original source code. There are several techniques to do this ([Alternatives](#alternatives)). However, these techniques have their own limitations and disadvantages.
@@ -476,24 +476,20 @@ TEST_F(FooFixture, Constexpr) {
 ```
 
 ### Virtual functions
-Virtual functions are problematic, because a pointer-to-member function
-has a different layout in case of virtual functions than in case of regular
-member functions. We have to get the address by getting the vtable from an
-object and then getting the proper element of the vtable.
+Virtual functions are problematic, because a pointer-to-member function has a
+different layout in case of virtual functions than in case of regular member
+functions. Normally, we would have to get the address by getting the vtable
+from an object and then getting the proper element of the vtable.
 
-GCC has a construct with which we could get the address without knowing the
+GCC has a construct with which we can get the address without knowing the
 actually used ABI, but clang does not:
 https://llvm.org/bugs/show_bug.cgi?id=22121
 https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Bound-member-functions.html
 
-Note, it would be
-better to have a compiler intrinsic which would simply return the adress of
-the function, which is known statically during compile time.
-Theoritically there is no need to provide an object.
-
-We get the address now according to the Itanium C++ ABI.
-https://mentorembedded.github.io/cxx-abi/abi.html#member-pointers
-https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/
+In our patched Clang, we provide a compiler intrinsic which simply returns the
+adress of the function which is known statically during compile time.  There
+is no need to provide an object.  The use of the intrinsic is hidden in the
+implementation of the `SUBSTITUTE` macro.
 
 ## How to build
 
@@ -546,6 +542,8 @@ mkdir -p $PROJ/rt
 cd $PROJ/rt
 
 git clone https://github.com/martong/finstrument_mock.git
+git submodule init
+git submodule update
 cd finstrument_mock
 mkdir build
 cd build
@@ -570,7 +568,7 @@ Use the `-fno-inline-functions -fsanitize=mock` switches to instrument all call 
 Test setup is pretty straightforward:
 Use `_clear_function_substitutions` to clear the substitutions.
 In C use `_substitute_function` to replace functions.
-In C++ use `SUBSTITUTE(&from, &to)` to replace free or non-virtual member functions, use `SUBSTITUTE_VIRTUAL` to replace virtual functions.
+In C++ use `SUBSTITUTE(&from, &to)` to replace functions.
 
 In case of free functions, the signature of `from` and `to` must be identical.
 Unfortunately we don't assert on this currently (see future work).
@@ -579,50 +577,93 @@ In case of member functions the test double's signature must have the same signa
 The first argument must be a pointer to the type whose member we are replacing.
 
 ### Virtual functions
-To replace virtual functions one must use the `SUBSTITUTE_VIRTUAL` function template, which requires a pointer to a (dummy) instance of the class which has the virtual function.
-
-#### Replace virtual functions
+Replace the virtual function in the base class does not imply that the function
+is replaced in the derived class. The replaced function will be called only if
+the object's dynamic type is the base class type.  Similarly, replace the
+virtual function in the derived class has no impact on the base class. The
+replaced function will be called only if the object's dynamic type is the
+derived class type.
 
 ```c++
 namespace {
+namespace Basic {
+
+enum class Values : int { B, D, FB, FD };
 struct B {
-    virtual int foo2(int p) { return p; }
-    virtual int foo(int p) { return p; }
+    virtual Values foo(int p) { return Values::B; }
 };
 struct D : B {
-    virtual int foo2(int p) override { return p + p; }
-    virtual int foo(int p) override { return p + p; }
+    virtual Values foo(int p) override { return Values::D; }
 };
-int B_fake_foo(B*, int p) { return p + p + p; }
-int D_fake_foo(D*, int p) { return p + p + p + p; }
-} // unnamed
+Values B_fake_foo(B*, int p) { return Values::FB; }
+Values D_fake_foo(D*, int p) { return Values::FD; }
 
-TEST_F(FooFixture, DynamicType) {
-    B* dummy = new D;
-    SUBSTITUTE_VIRTUAL(&D::foo, dummy, &D_fake_foo);
+} // namespace Basic
+} // namespace unnamed
+
+// Replace the virtual function in the base class
+TEST_F(DynamicTypeWithFunctionId, Basic_B) {
+    using Basic::B;
+    using Basic::D;
+    using Basic::B_fake_foo;
+    using Basic::Values;
+
+    SUBSTITUTE(B::foo, B_fake_foo);
     {
         B* b0 = new B;
-        EXPECT_EQ(b0->foo(1), 1); // As without mock san
+        EXPECT_EQ(b0->foo(1), Values::FB);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), 4);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::D);
     }
 }
 
-TEST_F(FooFixture, DynamicType2) {
-    B* dummy = new B;
-    SUBSTITUTE_VIRTUAL(&B::foo, dummy, &B_fake_foo);
+// Replace the virtual function in the derived class
+TEST_F(DynamicTypeWithFunctionId, Basic_D) {
+    using Basic::B;
+    using Basic::D;
+    using Basic::D_fake_foo;
+    using Basic::Values;
+
+    SUBSTITUTE(D::foo, D_fake_foo);
     {
         B* b0 = new B;
-        EXPECT_EQ(b0->foo(1), 3);
+        EXPECT_EQ(b0->foo(1), Values::B);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), 2); // As w/o mock san
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::FD);
     }
 }
 ```
+
+### Overloaded functions
+We can replace overloaded functions by passing the function signature as an
+argument to the `SUBSTITUTE` macro.
+```
+int foo(int) { return 1; }
+int foo(double) { return 2; }
+int foo(int, int) { return 3; }
+
+int fake_foo_i(int) { return 11; }
+int fake_foo_d(double) { return 22; }
+int fake_foo_ii(int, int) { return 33; }
+
+TEST_F(Overload, freeFunction) {
+    SUBSTITUTE(int(int), foo, fake_foo_i);
+    EXPECT_EQ(foo(1), 11);
+    SUBSTITUTE(int(double), foo, fake_foo_d);
+    EXPECT_EQ(foo(1.0f), 22);
+    SUBSTITUTE(int(int, int), foo, fake_foo_ii);
+    EXPECT_EQ(foo(1, 1), 33);
+}
+
+```
+
+### How to access privates?
+In some white box testing cases it might be a must to access privates.
+More on this [here](https://github.com/martong/access_private) and [here](https://www.youtube.com/watch?v=U9Up_OfiW24).
 
 ### Difficulties with libcxx and `always_inline` attribute
 If you want to instrument those calls where the callee has the `always_inline` attribute then you have to specify `-fno-inline-functions -fsanitize=mock -fsanitize=mock_always_inline`.
@@ -637,9 +678,6 @@ The latter is possible in the finstrument_mock branch of the libcxx repo if you 
 For more details please check the CMakeLists.txt in `instrument_always_inline`.
 Note that this problem does not arise on Linux/GCC/6.2/libstdc++.
 
-### How to access privates?
-In some white box testing cases it might be a must to access privates.
-More on this [here](https://github.com/martong/access_private) and [here](https://www.youtube.com/watch?v=U9Up_OfiW24).
 
 ## Performance
 Our measurements show that the compilation process does not slow down noticeably.
