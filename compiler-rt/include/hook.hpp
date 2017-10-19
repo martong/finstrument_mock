@@ -21,7 +21,10 @@
 
 #define SUBSTITUTE_OVERLOAD(signature, src, dst)                               \
   do {                                                                         \
-    _substitute_function((const char *)__function_id src,                      \
+    using SignAlias = signature;                                               \
+    using FunPtr = SignAlias *;                                                \
+    FunPtr funptr = __function_id src;                                         \
+    _substitute_function((const char *)funptr,                                 \
                          (const char *)__function_id dst);                     \
   } while (0)
 
