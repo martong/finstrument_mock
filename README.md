@@ -678,7 +678,6 @@ The latter is possible in the finstrument_mock branch of the libcxx repo if you 
 For more details please check the CMakeLists.txt in `instrument_always_inline`.
 Note that this problem does not arise on Linux/GCC/6.2/libstdc++.
 
-
 ## Performance
 Our measurements show that the compilation process does not slow down noticeably.
 The slow down is quite similar to other sanitizers.
@@ -690,11 +689,33 @@ We have built the following c++ projects with `-fsanitize=mock -fno-inline-funct
 
 Currently the `-fsanitize=mock_always_inline` is tested only with the tests of this repository.
 
+## Limitations
+### Constructors and destructors
+At the moment it looks like we can replace a destructor, but it is still very experimental.
+Replace a constructor is not supported (yet).
+In short, it would require to change the parser and the semantic actions to be able to parse the second `X` in `X::X` as a function instead of a type.
+I think this is feasible but requires some more work, see https://github.com/martong/clang/commit/aff53813f4b22d0e5d5ab1098c801747a14ab787
+
+### Lambdas and functions in nested structs
+Replace the `operator()` of a lambda is not supported unless we can take the address of the lambda.
+Similarly, member functions of structs/classes which are defined inside a function cannot be replaced, because there is no valid expression to get their address.
+E.g. we can't replace `bar` outside of the scope of `X`:
+```
+void foo() {
+  struct X {
+    void bar() {}
+  };
+}
+// ...
+SUBSTITUTE(foo()::X::bar, fake_bar)
+//            ^^ ERROR
+```
+To be able to parse such expressions would require much more effort than in case of constructors, and I am not sure if it would be userful ever.
+
 ## Future work
 * Enforce type checking in the header of the runtime library. http://stackoverflow.com/questions/25044869/member-function-traits http://www.boost.org/doc/libs/1_61_0/libs/type_traits/doc/html/boost_typetraits/reference/function_traits.html
 * Use shadow memory (similarly as asan do in asan_rtl.cc/`AsanInitInternal()`) instead of a simple hash map in the runtime lib. That could result approximately a slowdown of 5x - 15x.
 * Make more precise measurements on compilation slow down.
-* Make measurements on binary size growth.
 
 ### Compile time reflection
 With this instrumentation it is not possible to replace a whole type with a test double type.
