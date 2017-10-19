@@ -30,8 +30,8 @@ TEST_F(DynamicTypeWithFunctionId, Basic_D) {
         EXPECT_EQ(b0->foo(1), Values::B);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::FD);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::FD);
     }
 }
 
@@ -47,8 +47,8 @@ TEST_F(DynamicTypeWithFunctionId, Basic_B) {
         EXPECT_EQ(b0->foo(1), Values::FB);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::D);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::D);
     }
 }
 
@@ -109,8 +109,8 @@ TEST_F(DynamicTypeWithFunctionId, InheritanceChain_C) {
         EXPECT_EQ(b0->foo(1), Values::FC);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::D);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::D);
     }
 }
 
@@ -131,8 +131,8 @@ TEST_F(DynamicTypeWithFunctionId, InheritanceChain_B) {
         EXPECT_EQ(b0->foo(1), Values::C);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::D);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::D);
     }
 }
 
@@ -171,8 +171,8 @@ TEST_F(DynamicTypeWithFunctionId, MultipleInheritance_D) {
         EXPECT_EQ(b0->foo(1), Values::C);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::FD);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::FD);
     }
 }
 
@@ -193,8 +193,8 @@ TEST_F(DynamicTypeWithFunctionId, MultipleInheritance_C) {
         EXPECT_EQ(b0->foo(1), Values::FC);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::D);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::D);
     }
 }
 
@@ -215,8 +215,8 @@ TEST_F(DynamicTypeWithFunctionId, MultipleInheritance_B) {
         EXPECT_EQ(b0->foo(1), Values::C);
     }
     {
-        B* b1 = new D;
-        EXPECT_EQ(b1->foo(1), Values::D);
+        B* b0 = new D;
+        EXPECT_EQ(b0->foo(1), Values::D);
     }
 }
 
