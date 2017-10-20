@@ -1,0 +1,166 @@
+##STARTING Version 1.0
+2017. okt. 20., péntek, 11:36:33 CEST
+##CPPFlags:  -O2 -I. -I/home/egbomrt/WORK/finstrument_mock//rt/finstrument_mock/compiler-rt/include -g -std=c++11
+##Start machine report version 1.0
+##Compiler
+GCC version 4.2.1 Compatible Clang 3.9.0 (https://github.com/martong/clang.git 0ed0bb61b0b4b84c384110a871ccd2edc3c91c60) (https://github.com/martong/llvm.git 7481ed38afc3b6b1fbcfb946c9d1501f1c6232c1)
+Compiled for LP64
+##Target CPU
+Compiled for x86 64bit
+##Physical CPU
+Little Endian
+##Machine
+##Operating System
+##End machine report
+./stepanov_abstraction 20000 
+
+test                        description   absolute   operations   ratio with
+number                                    time       per second   test0
+
+ 0                     "double pointer"   0.03 sec   1231.83 M     1.00
+ 1               "double pointer_class"   0.03 sec   1249.38 M     0.99
+ 2         "DoubleValueWrapper pointer"   0.03 sec   1248.79 M     0.99
+ 3   "DoubleValueWrapper pointer_class"   0.03 sec   1252.70 M     0.98
+ 4       "DoubleValueWrapper10 pointer"   0.03 sec   1252.07 M     0.98
+ 5 "DoubleValueWrapper10 pointer_class"   0.03 sec   1253.13 M     0.98
+
+Total absolute time for Abstraction Accumulate: 0.19 sec
+
+Abstraction Accumulate Penalty: 0.98
+
+
+test                                       description   absolute   operations   ratio with
+number                                                   time       per second   test0
+
+ 0                     "insertion_sort double pointer"   0.00 sec    5.01 M     1.00
+ 1               "insertion_sort double pointer_class"   0.01 sec    3.42 M     1.46
+ 2         "insertion_sort DoubleValueWrapper pointer"   0.00 sec    5.02 M     1.00
+ 3   "insertion_sort DoubleValueWrapper pointer_class"   0.01 sec    3.25 M     1.54
+ 4       "insertion_sort DoubleValueWrapper10 pointer"   0.00 sec    5.02 M     1.00
+ 5 "insertion_sort DoubleValueWrapper10 pointer_class"   0.01 sec    3.24 M     1.54
+
+Total absolute time for Abstraction Insertion Sort: 0.03 sec
+
+Abstraction Insertion Sort Penalty: 1.28
+
+
+test                                  description   absolute   operations   ratio with
+number                                              time       per second   test0
+
+ 0                     "quicksort double pointer"   0.01 sec   22.70 M     1.00
+ 1               "quicksort double pointer_class"   0.01 sec   23.32 M     0.97
+ 2         "quicksort DoubleValueWrapper pointer"   0.01 sec   22.40 M     1.01
+ 3   "quicksort DoubleValueWrapper pointer_class"   0.01 sec   23.25 M     0.98
+ 4       "quicksort DoubleValueWrapper10 pointer"   0.01 sec   22.88 M     0.99
+ 5 "quicksort DoubleValueWrapper10 pointer_class"   0.01 sec   22.74 M     1.00
+
+Total absolute time for Abstraction Quicksort: 0.04 sec
+
+Abstraction Quicksort Penalty: 0.99
+
+
+test                                  description   absolute   operations   ratio with
+number                                              time       per second   test0
+
+ 0                     "heap_sort double pointer"   0.01 sec   26.91 M     1.00
+ 1               "heap_sort double pointer_class"   0.01 sec   27.02 M     1.00
+ 2         "heap_sort DoubleValueWrapper pointer"   0.01 sec   27.00 M     1.00
+ 3   "heap_sort DoubleValueWrapper pointer_class"   0.01 sec   27.00 M     1.00
+ 4       "heap_sort DoubleValueWrapper10 pointer"   0.01 sec   27.05 M     0.99
+ 5 "heap_sort DoubleValueWrapper10 pointer_class"   0.01 sec   26.52 M     1.01
+
+Total absolute time for Abstraction Heap Sort: 0.04 sec
+
+Abstraction Heap Sort Penalty: 1.00
+
+./stepanov_vector 15000 
+
+test                            description   absolute   operations   ratio with
+number                                        time       per second   test0
+
+ 0                 "double pointer verify2"   0.02 sec   1235.64 M     1.00
+ 1                 "double vector iterator"   0.02 sec   1245.02 M     0.99
+ 2                 "double pointer reverse"   0.02 sec   1247.66 M     0.99
+ 3         "double vector reverse_iterator"   0.02 sec   1253.24 M     0.99
+ 4         "double vector iterator reverse"   0.02 sec   1250.10 M     0.99
+ 5         "double pointer reverse reverse"   0.02 sec   1246.62 M     0.99
+ 6 "double vector reverse_iterator reverse"   0.02 sec   1251.83 M     0.99
+ 7 "double vector iterator reverse reverse"   0.02 sec   1245.95 M     0.99
+
+Total absolute time for Vector Accumulate: 0.19 sec
+
+Vector Accumulate Penalty: 0.99
+
+
+test                                           description   absolute   operations   ratio with
+number                                                       time       per second   test0
+
+ 0                 "insertion_sort double pointer verify2"   0.01 sec    4.98 M     1.00
+ 1                 "insertion_sort double vector iterator"   0.01 sec    3.24 M     1.54
+ 2                 "insertion_sort double pointer reverse"   0.01 sec    3.94 M     1.26
+ 3         "insertion_sort double vector reverse_iterator"   0.01 sec    3.88 M     1.28
+ 4         "insertion_sort double vector iterator reverse"   0.01 sec    3.89 M     1.28
+ 5         "insertion_sort double pointer reverse reverse"   0.01 sec    2.62 M     1.90
+ 6 "insertion_sort double vector reverse_iterator reverse"   0.01 sec    2.63 M     1.89
+ 7 "insertion_sort double vector iterator reverse reverse"   0.01 sec    2.64 M     1.89
+
+Total absolute time for Vector Insertion Sort: 0.07 sec
+
+Vector Insertion Sort Penalty: 1.55
+
+
+test                                      description   absolute   operations   ratio with
+number                                                  time       per second   test0
+
+ 0                 "quicksort double pointer verify2"   0.01 sec   22.60 M     1.00
+ 1                 "quicksort double vector iterator"   0.01 sec   22.99 M     0.98
+ 2                 "quicksort double pointer reverse"   0.01 sec   20.43 M     1.11
+ 3         "quicksort double vector reverse_iterator"   0.01 sec   20.61 M     1.10
+ 4         "quicksort double vector iterator reverse"   0.01 sec   20.66 M     1.09
+ 5         "quicksort double pointer reverse reverse"   0.01 sec   21.88 M     1.03
+ 6 "quicksort double vector reverse_iterator reverse"   0.01 sec   21.87 M     1.03
+ 7 "quicksort double vector iterator reverse reverse"   0.01 sec   22.02 M     1.03
+
+Total absolute time for Vector Quicksort: 0.09 sec
+
+Vector Quicksort Penalty: 1.05
+
+
+test                                      description   absolute   operations   ratio with
+number                                                  time       per second   test0
+
+ 0                 "heap_sort double pointer verify2"   0.01 sec   27.10 M     1.00
+ 1                 "heap_sort double vector iterator"   0.01 sec   26.82 M     1.01
+ 2                 "heap_sort double pointer reverse"   0.01 sec   22.36 M     1.21
+ 3         "heap_sort double vector reverse_iterator"   0.01 sec   22.25 M     1.22
+ 4         "heap_sort double vector iterator reverse"   0.01 sec   22.32 M     1.21
+ 5         "heap_sort double pointer reverse reverse"   0.01 sec   26.66 M     1.02
+ 6 "heap_sort double vector reverse_iterator reverse"   0.01 sec   26.48 M     1.02
+ 7 "heap_sort double vector iterator reverse reverse"   0.01 sec   26.66 M     1.02
+
+Total absolute time for Vector Heap Sort: 0.08 sec
+
+Vector Heap Sort Penalty: 1.10
+
+./functionobjects 200 
+
+test                                                description   absolute   operations   ratio with
+number                                                            time       per second   test0
+
+ 0                          "qsort array with function pointer"   0.17 sec   12.02 M     1.00
+ 1             "quicksort function array with function pointer"   0.15 sec   13.63 M     0.88
+ 2             "quicksort template array with function pointer"   0.15 sec   13.48 M     0.89
+ 3    "quicksort template array with template function pointer"   0.15 sec   13.42 M     0.90
+ 4                           "sort array with function pointer"   0.11 sec   17.45 M     0.69
+ 5        "quicksort template array with user-supplied functor"   0.11 sec   17.97 M     0.67
+ 6                      "sort array with user-supplied functor"   0.09 sec   21.51 M     0.56
+ 7 "quicksort template array with user-supplied inline functor"   0.11 sec   18.24 M     0.66
+ 8               "sort array with user-supplied inline functor"   0.09 sec   21.35 M     0.56
+ 9             "quicksort template array with standard functor"   0.11 sec   18.38 M     0.65
+10                           "sort array with standard functor"   0.09 sec   21.11 M     0.57
+11            "quicksort template array with native < operator"   0.11 sec   17.71 M     0.68
+12                          "sort array with native < operator"   0.09 sec   21.52 M     0.56
+
+Total absolute time for Function Objects: 1.54 sec
+2017. okt. 20., péntek, 11:36:35 CEST
+##END Version 1.0
