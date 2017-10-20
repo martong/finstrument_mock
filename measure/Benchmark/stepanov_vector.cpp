@@ -27,6 +27,8 @@ HIstory:
 #include <cmath>
 #include <cstdlib>
 #include <vector>
+#include <algorithm>
+
 #include "benchmark_results.h"
 #include "benchmark_timer.h"
 #include "benchmark_algorithms.h"

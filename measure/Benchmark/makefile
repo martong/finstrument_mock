@@ -18,7 +18,7 @@ MSAN_I = $(MSAN_BASE)/rt/finstrument_mock/compiler-rt/include
 
 LDFLAGS = -rpath $(MSAN) -L $(MSAN) -lmock_san
 INCLUDE = -I. -I$(MSAN_I)
-CPPFLAGS += $(INCLUDE) -g
+CPPFLAGS += $(INCLUDE) -g -std=c++11
 
 CLIBS = -lm
 CPPLIBS = -lm
