@@ -1,5 +1,6 @@
 project(semi_instrumented)
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -ffunction-id")
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/compiler-rt/include)
 file(GLOB SOURCES "*.cpp")
