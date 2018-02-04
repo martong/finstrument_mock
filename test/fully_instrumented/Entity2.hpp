@@ -9,10 +9,8 @@ public:
         if (lock.owns_lock()) {
             auto result = std::accumulate(v.begin(), v.end(), i);
             return result;
-        } else {
-            return -1;
         }
-        return 0;
+        return -1;
     }
     void add(int i) {
         std::lock_guard<std::mutex> lock{m};
