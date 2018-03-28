@@ -9,10 +9,8 @@ public:
             auto result = std::accumulate(v.begin(), v.end(), i);
             m.unlock();
             return result;
-        } else {
-            return -1;
         }
-        return 0;
+        return -1;
     }
     void add(int i) { v.push_back(i); }
 

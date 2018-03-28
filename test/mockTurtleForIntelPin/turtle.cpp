@@ -37,10 +37,12 @@ public:
   MOCK_CONST_METHOD0(GetY, int());
 };
 
+static MockTurtle* m = nullptr;
 MockTurtle& GetMockObject(Turtle*) {
-    static MockTurtle m;
-    return m;
+    if (m == nullptr) m = new MockTurtle();
+    return *m;
 }
+void ReleaseMockObjects() { delete m; }
 
 namespace proxy {
     void GoTo(Turtle* self, int x, int y) {
@@ -77,6 +79,8 @@ TEST(TurtleTest, TestDrawLine) {
 
     EXPECT_CALL(mockTurtle, PenDown()).Times(AtLeast(1));
     painter.DrawLine(0, 0, 10, 10);
+
+    ReleaseMockObjects();
 }
 
 int main(int argc, char **argv) {

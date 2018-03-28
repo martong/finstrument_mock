@@ -29,6 +29,7 @@
   } while (0)
 
 // https://stackoverflow.com/questions/11761703/overloading-macro-on-number-of-arguments
+// (Note, we could use BOOST_PP_OVERLOAD as well)
 #define GET_MACRO(_1, _2, _3, NAME, ...) NAME
 #define SUBSTITUTE(...)                                                        \
   GET_MACRO(__VA_ARGS__, SUBSTITUTE_OVERLOAD, SUBSTITUTE_BASE)(__VA_ARGS__)
